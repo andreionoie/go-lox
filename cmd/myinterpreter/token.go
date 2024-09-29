@@ -7,6 +7,8 @@ type TokenType string
 const (
 	LeftParen  TokenType = "LEFT_PAREN"
 	RightParen           = "RIGHT_PAREN"
+	LeftBrace            = "LEFT_BRACE"
+	RightBrace           = "RIGHT_BRACE"
 	Eof                  = "EOF"
 )
 

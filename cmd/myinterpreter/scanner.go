@@ -34,6 +34,10 @@ func (s *Scanner) scan() {
 		s.addToken(LeftParen)
 	case ')':
 		s.addToken(RightParen)
+	case '{':
+		s.addToken(LeftBrace)
+	case '}':
+		s.addToken(RightBrace)
 	case '\n':
 		s.Line++
 	default:

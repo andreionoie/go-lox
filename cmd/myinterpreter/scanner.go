@@ -38,6 +38,18 @@ func (s *Scanner) scan() {
 		s.addToken(LeftBrace)
 	case '}':
 		s.addToken(RightBrace)
+	case ',':
+		s.addToken(Comma)
+	case '.':
+		s.addToken(Dot)
+	case '-':
+		s.addToken(Minus)
+	case '+':
+		s.addToken(Plus)
+	case ';':
+		s.addToken(Semicolon)
+	case '*':
+		s.addToken(Star)
 	case '\n':
 		s.Line++
 	default:

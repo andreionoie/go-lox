@@ -9,6 +9,12 @@ const (
 	RightParen           = "RIGHT_PAREN"
 	LeftBrace            = "LEFT_BRACE"
 	RightBrace           = "RIGHT_BRACE"
+	Comma                = "COMMA"
+	Dot                  = "DOT"
+	Minus                = "MINUS"
+	Plus                 = "PLUS"
+	Semicolon            = "SEMICOLON"
+	Star                 = "STAR"
 	Eof                  = "EOF"
 )
 

@@ -1,13 +1,17 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 type Scanner struct {
-	Source  []rune
-	Tokens  []Token
-	Start   int
-	Current int
-	Line    int
+	Source    []rune
+	Tokens    []Token
+	Start     int
+	Current   int
+	Line      int
+	HadErrors bool
 }
 
 func (s *Scanner) scanTokens() {
@@ -53,7 +57,8 @@ func (s *Scanner) scan() {
 	case '\n':
 		s.Line++
 	default:
-		fmt.Print("unrecognized character " + string(nextRune))
+		fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %s\n", s.Line+1, string(nextRune))
+		s.HadErrors = true
 	}
 }
 

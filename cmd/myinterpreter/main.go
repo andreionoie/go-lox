@@ -40,5 +40,8 @@ func main() {
 		for _, tok := range scanner.Tokens {
 			fmt.Println(tok)
 		}
+		if scanner.HadErrors {
+			os.Exit(65)
+		}
 	}
 }

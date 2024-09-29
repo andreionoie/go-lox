@@ -30,7 +30,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if len(fileContents) > 0 {
+	if len(fileContents) >= 0 {
 		scanner := Scanner{
 			Source: []rune(string(fileContents)),
 		}

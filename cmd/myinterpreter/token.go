@@ -18,5 +18,10 @@ type Token struct {
 }
 
 func (tok Token) String() string {
-	return fmt.Sprintf("%s %s %s", tok.Type, tok.Lexeme, tok.Literal)
+	lit := "null"
+	if tok.Literal != nil {
+		lit = fmt.Sprintf("%s", tok.Literal)
+	}
+
+	return fmt.Sprintf("%s %s %s", tok.Type, tok.Lexeme, lit)
 }

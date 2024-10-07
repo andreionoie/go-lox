@@ -15,6 +15,8 @@ const (
 	Plus                 = "PLUS"
 	Semicolon            = "SEMICOLON"
 	Star                 = "STAR"
+	Equal                = "EQUAL"
+	EqualEqual           = "EQUAL_EQUAL"
 	Eof                  = "EOF"
 )
 

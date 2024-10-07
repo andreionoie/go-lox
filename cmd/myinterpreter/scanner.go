@@ -54,6 +54,12 @@ func (s *Scanner) scan() {
 		s.addToken(Semicolon)
 	case '*':
 		s.addToken(Star)
+	case '=':
+		if s.match('=') {
+			s.addToken(EqualEqual)
+		} else {
+			s.addToken(Equal)
+		}
 	case '\n':
 		s.Line++
 	default:
@@ -80,4 +86,13 @@ func (s *Scanner) advance() rune {
 	curr := s.Current
 	s.Current++
 	return s.Source[curr]
+}
+
+func (s *Scanner) match(expected rune) bool {
+	if s.isAtEnd() || (s.Source[s.Current] != expected) {
+		return false
+	}
+
+	s.Current++
+	return true
 }

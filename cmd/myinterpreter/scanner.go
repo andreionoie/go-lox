@@ -86,13 +86,14 @@ func (s *Scanner) scan() {
 		} else {
 			s.addToken(Slash)
 		}
+	case '"':
+		s.string()
 	case ' ', '\t':
 		// noop
 	case '\n':
 		s.Line++
 	default:
-		fmt.Fprintf(os.Stderr, "[line %d] Error: Unexpected character: %s\n", s.Line+1, string(nextRune))
-		s.HadErrors = true
+		s.logError("Unexpected character: %c", nextRune)
 	}
 }
 
@@ -111,9 +112,8 @@ func (s *Scanner) addToken(tokenType TokenType) {
 }
 
 func (s *Scanner) advance() rune {
-	curr := s.Current
 	s.Current++
-	return s.Source[curr]
+	return s.Source[s.Current-1]
 }
 
 func (s *Scanner) match(expected rune) bool {
@@ -123,4 +123,26 @@ func (s *Scanner) match(expected rune) bool {
 
 	s.Current++
 	return true
+}
+
+func (s *Scanner) string() {
+	for !s.isAtEnd() && s.Source[s.Current] != '"' {
+		if s.Source[s.Current] == '\n' {
+			s.Line++
+		}
+		s.Current++
+	}
+
+	if s.isAtEnd() {
+		s.logError("Unterminated string.")
+		return
+	}
+	s.Current++
+	s.addTokenWithLiteral(String, string(s.Source[s.Start+1:s.Current-1]))
+}
+
+func (s *Scanner) logError(msg string, a ...any) {
+	fmtString := fmt.Sprintf("[line %d] Error: %s\n", s.Line+1, msg)
+	fmt.Fprintf(os.Stderr, fmtString, a...)
+	s.HadErrors = true
 }

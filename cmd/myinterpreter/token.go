@@ -24,6 +24,7 @@ const (
 	Greater                = "GREATER"
 	GreaterEqual           = "GREATER_EQUAL"
 	Slash                  = "SLASH"
+	String                 = "STRING"
 	Eof                    = "EOF"
 )
 

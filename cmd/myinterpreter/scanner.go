@@ -92,6 +92,8 @@ func (s *Scanner) scan() {
 		s.string()
 	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 		s.number()
+	case '_', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z':
+		s.identifier()
 	case ' ', '\t':
 		// noop
 	case '\n':
@@ -165,6 +167,13 @@ func (s *Scanner) number() {
 		s.logError(err.Error())
 	}
 	s.addTokenWithLiteral(Number, literalAsFloat)
+}
+
+func (s *Scanner) identifier() {
+	for !s.isAtEnd() && (unicode.IsLetter(s.Source[s.Current]) || unicode.IsNumber(s.Source[s.Current]) || s.Source[s.Current] == '_') {
+		s.Current++
+	}
+	s.addToken(Identifier)
 }
 
 func (s *Scanner) logError(msg string, a ...any) {

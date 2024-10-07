@@ -30,6 +30,7 @@ const (
 	Slash                  = "SLASH"
 	String                 = "STRING"
 	Number                 = "NUMBER"
+	Identifier             = "IDENTIFIER"
 	Eof                    = "EOF"
 )
 

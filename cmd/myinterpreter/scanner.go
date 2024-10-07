@@ -86,6 +86,8 @@ func (s *Scanner) scan() {
 		} else {
 			s.addToken(Slash)
 		}
+	case ' ', '\t':
+		// noop
 	case '\n':
 		s.Line++
 	default:

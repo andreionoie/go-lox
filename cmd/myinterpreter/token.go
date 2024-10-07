@@ -28,11 +28,57 @@ const (
 	Greater                = "GREATER"
 	GreaterEqual           = "GREATER_EQUAL"
 	Slash                  = "SLASH"
-	String                 = "STRING"
-	Number                 = "NUMBER"
-	Identifier             = "IDENTIFIER"
-	Eof                    = "EOF"
+
+	String     = "STRING"
+	Number     = "NUMBER"
+	Identifier = "IDENTIFIER"
+
+	True  = "TRUE"
+	False = "FALSE"
+	And   = "AND"
+	Or    = "OR"
+
+	Nil   = "NIL"
+	This  = "THIS"
+	Super = "SUPER"
+
+	Function = "FUN"
+	Class    = "CLASS"
+
+	If     = "IF"
+	Else   = "ELSE"
+	For    = "FOR"
+	While  = "WHILE"
+	Return = "RETURN"
+
+	Print = "PRINT"
+	Var   = "VAR"
+
+	Eof = "EOF"
 )
+
+var ReservedKeywords = map[string]TokenType{
+	"true":  True,
+	"false": False,
+	"and":   And,
+	"or":    Or,
+
+	"nil":   Nil,
+	"this":  This,
+	"super": Super,
+
+	"fun":   Function,
+	"class": Class,
+
+	"if":     If,
+	"else":   Else,
+	"for":    For,
+	"while":  While,
+	"return": Return,
+
+	"print": Print,
+	"var":   Var,
+}
 
 type Token struct {
 	Type    TokenType

@@ -92,7 +92,9 @@ func (s *Scanner) scan() {
 		s.string()
 	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
 		s.number()
-	case '_', 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z':
+	case '_',
+		'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+		'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z':
 		s.identifier()
 	case ' ', '\t':
 		// noop
@@ -173,7 +175,12 @@ func (s *Scanner) identifier() {
 	for !s.isAtEnd() && (unicode.IsLetter(s.Source[s.Current]) || unicode.IsNumber(s.Source[s.Current]) || s.Source[s.Current] == '_') {
 		s.Current++
 	}
-	s.addToken(Identifier)
+	keyword, ok := ReservedKeywords[string(s.Source[s.Start:s.Current])]
+	if ok {
+		s.addToken(keyword)
+	} else {
+		s.addToken(Identifier)
+	}
 }
 
 func (s *Scanner) logError(msg string, a ...any) {

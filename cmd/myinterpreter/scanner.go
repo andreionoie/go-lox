@@ -60,6 +60,12 @@ func (s *Scanner) scan() {
 		} else {
 			s.addToken(Equal)
 		}
+	case '!':
+		if s.match('=') {
+			s.addToken(BangEqual)
+		} else {
+			s.addToken(Bang)
+		}
 	case '\n':
 		s.Line++
 	default:

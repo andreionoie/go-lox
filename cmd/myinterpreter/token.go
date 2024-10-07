@@ -17,6 +17,8 @@ const (
 	Star                 = "STAR"
 	Equal                = "EQUAL"
 	EqualEqual           = "EQUAL_EQUAL"
+	Bang                 = "BANG"
+	BangEqual            = "BANG_EQUAL"
 	Eof                  = "EOF"
 )
 

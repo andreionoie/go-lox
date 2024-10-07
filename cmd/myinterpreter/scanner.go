@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
+	"unicode"
 )
 
 type Scanner struct {
@@ -88,6 +90,8 @@ func (s *Scanner) scan() {
 		}
 	case '"':
 		s.string()
+	case '0', '1', '2', '3', '4', '5', '6', '7', '8', '9':
+		s.number()
 	case ' ', '\t':
 		// noop
 	case '\n':
@@ -138,7 +142,29 @@ func (s *Scanner) string() {
 		return
 	}
 	s.Current++
-	s.addTokenWithLiteral(String, string(s.Source[s.Start+1:s.Current-1]))
+	literal := string(s.Source[s.Start+1 : s.Current-1])
+	s.addTokenWithLiteral(String, literal)
+}
+
+func (s *Scanner) number() {
+	for !s.isAtEnd() && unicode.IsDigit(s.Source[s.Current]) {
+		s.Current++
+	}
+
+	if !s.isAtEnd() && s.Source[s.Current] == '.' && unicode.IsDigit(s.Source[s.Current+1]) {
+		s.Current++
+
+		for !s.isAtEnd() && unicode.IsDigit(s.Source[s.Current]) {
+			s.Current++
+		}
+	}
+
+	literal := string(s.Source[s.Start:s.Current])
+	literalAsFloat, err := strconv.ParseFloat(literal, 64)
+	if err != nil {
+		s.logError(err.Error())
+	}
+	s.addTokenWithLiteral(Number, literalAsFloat)
 }
 
 func (s *Scanner) logError(msg string, a ...any) {

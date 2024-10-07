@@ -1,6 +1,10 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strconv"
+	"strings"
+)
 
 type TokenType string
 
@@ -25,6 +29,7 @@ const (
 	GreaterEqual           = "GREATER_EQUAL"
 	Slash                  = "SLASH"
 	String                 = "STRING"
+	Number                 = "NUMBER"
 	Eof                    = "EOF"
 )
 
@@ -38,7 +43,20 @@ type Token struct {
 func (tok Token) String() string {
 	lit := "null"
 	if tok.Literal != nil {
-		lit = fmt.Sprintf("%s", tok.Literal)
+		switch v := tok.Literal.(type) {
+		case float64:
+			// return smallest number of digits necessary
+			lit = strconv.FormatFloat(v, 'f', -1, 64)
+			if !strings.Contains(lit, ".") {
+				lit += ".0"
+			}
+		case string:
+			// Use the string as is
+			lit = v
+		default:
+			// Fallback for other types
+			lit = fmt.Sprintf("%v", v)
+		}
 	}
 
 	return fmt.Sprintf("%s %s %s", tok.Type, tok.Lexeme, lit)

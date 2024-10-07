@@ -78,6 +78,14 @@ func (s *Scanner) scan() {
 		} else {
 			s.addToken(Greater)
 		}
+	case '/':
+		if s.match('/') {
+			for !s.isAtEnd() && s.Source[s.Current] != '\n' {
+				s.Current++
+			}
+		} else {
+			s.addToken(Slash)
+		}
 	case '\n':
 		s.Line++
 	default:

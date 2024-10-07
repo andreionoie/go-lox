@@ -23,6 +23,7 @@ const (
 	LessEqual              = "LESS_EQUAL"
 	Greater                = "GREATER"
 	GreaterEqual           = "GREATER_EQUAL"
+	Slash                  = "SLASH"
 	Eof                    = "EOF"
 )
 

@@ -66,6 +66,18 @@ func (s *Scanner) scan() {
 		} else {
 			s.addToken(Bang)
 		}
+	case '<':
+		if s.match('=') {
+			s.addToken(LessEqual)
+		} else {
+			s.addToken(Less)
+		}
+	case '>':
+		if s.match('=') {
+			s.addToken(GreaterEqual)
+		} else {
+			s.addToken(Greater)
+		}
 	case '\n':
 		s.Line++
 	default:

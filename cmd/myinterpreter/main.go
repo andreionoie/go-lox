@@ -21,8 +21,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Uncomment this block to pass the first stage
-
 	filename := os.Args[2]
 	fileContents, err := os.ReadFile(filename)
 	if err != nil {
@@ -35,11 +33,10 @@ func main() {
 			Source: []rune(string(fileContents)),
 		}
 
-		scanner.scanTokens()
-
-		for _, tok := range scanner.Tokens {
+		for _, tok := range scanner.ScanTokens() {
 			fmt.Println(tok)
 		}
+
 		if scanner.HadErrors {
 			os.Exit(65)
 		}

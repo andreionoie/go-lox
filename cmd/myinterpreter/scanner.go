@@ -16,7 +16,7 @@ type Scanner struct {
 	HadErrors bool
 }
 
-func (s *Scanner) scanTokens() {
+func (s *Scanner) ScanTokens() []Token {
 	for !s.isAtEnd() {
 		s.Start = s.Current
 		s.scan()
@@ -27,10 +27,8 @@ func (s *Scanner) scanTokens() {
 		Line:    s.Line,
 		Type:    Eof,
 	})
-}
 
-func (s *Scanner) isAtEnd() bool {
-	return s.Current >= len(s.Source)
+	return s.Tokens
 }
 
 func (s *Scanner) scan() {
@@ -187,4 +185,8 @@ func (s *Scanner) logError(msg string, a ...any) {
 	fmtString := fmt.Sprintf("[line %d] Error: %s\n", s.Line+1, msg)
 	fmt.Fprintf(os.Stderr, fmtString, a...)
 	s.HadErrors = true
+}
+
+func (s *Scanner) isAtEnd() bool {
+	return s.Current >= len(s.Source)
 }

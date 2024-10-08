@@ -88,6 +88,10 @@ type Token struct {
 }
 
 func (tok Token) String() string {
+	return fmt.Sprintf("%s %s %s", tok.Type, tok.Lexeme, tok.GetLiteralAsString())
+}
+
+func (tok Token) GetLiteralAsString() string {
 	lit := "null"
 	if tok.Literal != nil {
 		switch v := tok.Literal.(type) {
@@ -105,6 +109,5 @@ func (tok Token) String() string {
 			lit = fmt.Sprintf("%v", v)
 		}
 	}
-
-	return fmt.Sprintf("%s %s %s", tok.Type, tok.Lexeme, lit)
+	return lit
 }

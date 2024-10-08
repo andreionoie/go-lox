@@ -48,7 +48,11 @@ func main() {
 			}
 		case parseCommand:
 			for _, tok := range tokens {
-				fmt.Print(tok.Lexeme)
+				if tok.Literal != nil {
+					fmt.Print(tok.GetLiteralAsString())
+				} else {
+					fmt.Print(tok.Lexeme)
+				}
 			}
 		}
 

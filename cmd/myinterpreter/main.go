@@ -3,20 +3,26 @@ package main
 import (
 	"fmt"
 	"os"
+	"slices"
 )
+
+const tokenizeCommand = "tokenize"
+const parseCommand = "parse"
+
+var allowedCommands = []string{tokenizeCommand, parseCommand}
 
 func main() {
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
 	fmt.Fprintln(os.Stderr, "Logs from your program will appear here!")
 
 	if len(os.Args) < 3 {
-		fmt.Fprintln(os.Stderr, "Usage: ./your_program.sh tokenize <filename>")
+		fmt.Fprintf(os.Stderr, "Usage: ./your_program.sh %s <filename>\n", allowedCommands)
 		os.Exit(1)
 	}
 
 	command := os.Args[1]
 
-	if command != "tokenize" {
+	if !slices.Contains(allowedCommands, command) {
 		fmt.Fprintf(os.Stderr, "Unknown command: %s\n", command)
 		os.Exit(1)
 	}
@@ -33,8 +39,17 @@ func main() {
 			Source: []rune(string(fileContents)),
 		}
 
-		for _, tok := range scanner.ScanTokens() {
-			fmt.Println(tok)
+		tokens := scanner.ScanTokens()
+
+		switch command {
+		case tokenizeCommand:
+			for _, tok := range tokens {
+				fmt.Println(tok)
+			}
+		case parseCommand:
+			for _, tok := range tokens {
+				fmt.Print(tok.Lexeme)
+			}
 		}
 
 		if scanner.HadErrors {

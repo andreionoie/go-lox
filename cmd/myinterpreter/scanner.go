@@ -8,12 +8,12 @@ import (
 )
 
 type Scanner struct {
-	Source    []rune
-	Tokens    []Token
-	Start     int
-	Current   int
-	Line      int
-	HadErrors bool
+	Source      []rune
+	Tokens      []Token
+	Start       int
+	Current     int
+	CurrentLine int
+	HadErrors   bool
 }
 
 func (s *Scanner) ScanTokens() []Token {
@@ -24,7 +24,7 @@ func (s *Scanner) ScanTokens() []Token {
 	s.Tokens = append(s.Tokens, Token{
 		Lexeme:  "",
 		Literal: nil,
-		Line:    s.Line,
+		Line:    s.CurrentLine,
 		Type:    Eof,
 	})
 
@@ -97,7 +97,7 @@ func (s *Scanner) scan() {
 	case ' ', '\t':
 		// noop
 	case '\n':
-		s.Line++
+		s.CurrentLine++
 	default:
 		s.logError("Unexpected character: %c", nextRune)
 	}
@@ -107,7 +107,7 @@ func (s *Scanner) addTokenWithLiteral(tokenType TokenType, literal interface{}) 
 	token := Token{
 		Lexeme:  string(s.Source[s.Start:s.Current]),
 		Literal: literal,
-		Line:    s.Line,
+		Line:    s.CurrentLine,
 		Type:    tokenType,
 	}
 	s.Tokens = append(s.Tokens, token)
@@ -134,7 +134,7 @@ func (s *Scanner) match(expected rune) bool {
 func (s *Scanner) string() {
 	for !s.isAtEnd() && s.Source[s.Current] != '"' {
 		if s.Source[s.Current] == '\n' {
-			s.Line++
+			s.CurrentLine++
 		}
 		s.Current++
 	}
@@ -182,7 +182,7 @@ func (s *Scanner) identifier() {
 }
 
 func (s *Scanner) logError(msg string, a ...any) {
-	fmtString := fmt.Sprintf("[line %d] Error: %s\n", s.Line+1, msg)
+	fmtString := fmt.Sprintf("[line %d] Error: %s\n", s.CurrentLine+1, msg)
 	fmt.Fprintf(os.Stderr, fmtString, a...)
 	s.HadErrors = true
 }

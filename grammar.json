@@ -1,0 +1,32 @@
+{
+  "astDefinitions": [
+    {
+      "baseName": "Expr",
+      "productions": [
+        {
+          "head": "Binary",
+          "body": [
+            { "type": "Expr", "name": "left" },
+            { "type": "Token", "name": "operator" },
+            { "type": "Expr", "name": "right" }
+          ]
+        },
+        {
+          "head": "Unary",
+          "body": [
+            { "type": "Token", "name": "operator" },
+            { "type": "Expr", "name": "right" }
+          ]
+        },
+        {
+          "head": "Grouping",
+          "body": [{ "type": "Expr", "name": "expr" }]
+        },
+        {
+          "head": "Literal",
+          "body": [{ "type": "interface{}", "name": "value" }]
+        }
+      ]
+    }
+  ]
+}

@@ -54,6 +54,37 @@ func main() {
 					fmt.Print(tok.Lexeme)
 				}
 			}
+			fmt.Println()
+
+			// Construct the expression: (-123) * (45.67)
+			expression := &BinaryExpr{
+				left: &UnaryExpr{
+					operator: Token{
+						Type:    Minus,
+						Lexeme:  "-",
+						Literal: nil,
+						Line:    1,
+					},
+					right: &LiteralExpr{
+						value: 123,
+					},
+				},
+				operator: Token{
+					Type:    Star,
+					Lexeme:  "*",
+					Literal: nil,
+					Line:    1,
+				},
+				right: &GroupingExpr{
+					expr: &LiteralExpr{
+						value: 45.67,
+					},
+				},
+			}
+
+			printer := &AstPrettyPrinter{}
+			result, _ := expression.Accept(printer)
+			fmt.Println(result)
 		}
 
 		if scanner.HadErrors {

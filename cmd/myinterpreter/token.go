@@ -91,6 +91,17 @@ func (tok Token) String() string {
 	return fmt.Sprintf("%s %s %s", tok.Type, tok.Lexeme, tok.GetLiteralAsString())
 }
 
+func (tok Token) GetTokenAsTerminal() string {
+	switch tok.Type {
+	case Number, String:
+		return tok.GetLiteralAsString()
+	case True, False, Nil:
+		return strings.ToLower(string(tok.Type))
+	default:
+		panic("Unsupported terminal")
+	}
+}
+
 func (tok Token) GetLiteralAsString() string {
 	lit := "null"
 	if tok.Literal != nil {

@@ -16,30 +16,21 @@ func (p *Parser) expression() Expr {
 // primary -> NUMBER | STRING | "true" | "false" | "nil"
 // primary -> "(" expression ")"
 func (p *Parser) primary() Expr {
-	if p.match(True) {
-		return &LiteralExpr{value: "true"}
-	}
-	if p.match(False) {
-		return &LiteralExpr{value: "false"}
-	}
-	if p.match(Nil) {
-		return &LiteralExpr{value: "nil"}
-	}
-	if p.match(Number, String) {
-		return &LiteralExpr{value: p.previous().GetLiteralAsString()}
+	if p.match(Number, String, True, False, Nil) {
+		return &LiteralExpr{value: p.previous().GetTokenAsTerminal()}
 	}
 
 	if p.match(LeftParen) {
 		grouping := p.expression()
 		p.Current++
 		if p.previous().Type != RightParen {
-			panic("Unmatched parens")
+			panic("TODO: implement error handling")
 		}
 
 		return &GroupingExpr{expr: grouping}
 	}
 
-	panic("unreachable")
+	panic("TODO: implement error handling")
 }
 
 func (p *Parser) previous() Token {

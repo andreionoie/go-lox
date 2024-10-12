@@ -113,6 +113,10 @@ func (tok Token) GetTokenAsTerminal() string {
 		return ">="
 	case LessEqual:
 		return "<="
+	case EqualEqual:
+		return "=="
+	case BangEqual:
+		return "!="
 	default:
 		panic("Unsupported terminal")
 	}

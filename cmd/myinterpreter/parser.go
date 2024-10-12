@@ -10,9 +10,21 @@ func (p *Parser) Parse() Expr {
 }
 
 func (p *Parser) expression() Expr {
-	return p.comparison()
+	return p.equality()
 }
 
+// equality -> comparison ( ("==" | "!=") comparison)*
+func (p *Parser) equality() Expr {
+	leftCmp := p.comparison()
+	for p.match(EqualEqual, BangEqual) {
+		op := p.previous()
+		rightCmp := p.comparison()
+		leftCmp = &BinaryExpr{left: leftCmp, operator: op, right: rightCmp}
+	}
+	return leftCmp
+}
+
+// comparison -> term ( (>|<|<=|>=) term )*
 func (p *Parser) comparison() Expr {
 	leftTerm := p.term()
 	for p.match(Greater, Less, GreaterEqual, LessEqual) {

@@ -10,7 +10,18 @@ func (p *Parser) Parse() Expr {
 }
 
 func (p *Parser) expression() Expr {
-	return p.factor()
+	return p.term()
+}
+
+// term -> factor ( ("+" | "-") factor )*
+func (p *Parser) term() Expr {
+	leftFactor := p.factor()
+	for p.match(Plus, Minus) { // this "while" loop represents the * suffix in the notation
+		op := p.previous()
+		rightFactor := p.factor()
+		leftFactor = &BinaryExpr{left: leftFactor, operator: op, right: rightFactor}
+	}
+	return leftFactor
 }
 
 // factor -> unary ( ("*" | "/") unary )*

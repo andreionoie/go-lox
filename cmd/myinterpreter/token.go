@@ -101,6 +101,10 @@ func (tok Token) GetTokenAsTerminal() string {
 		return "*"
 	case Slash:
 		return "/"
+	case Plus:
+		return "+"
+	case Minus:
+		return "-"
 	default:
 		panic("Unsupported terminal")
 	}

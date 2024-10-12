@@ -97,6 +97,10 @@ func (tok Token) GetTokenAsTerminal() string {
 		return tok.GetLiteralAsString()
 	case True, False, Nil:
 		return strings.ToLower(string(tok.Type))
+	case Star:
+		return "*"
+	case Slash:
+		return "/"
 	default:
 		panic("Unsupported terminal")
 	}

@@ -10,6 +10,17 @@ func (p *Parser) Parse() Expr {
 }
 
 func (p *Parser) expression() Expr {
+	return p.unary()
+}
+
+// unary -> ("-" | "!") unary
+// unary -> primary
+func (p *Parser) unary() Expr {
+	if p.match(Minus, Bang) {
+		nestedUnary := p.unary()
+		return &UnaryExpr{operator: p.previous(), right: nestedUnary}
+	}
+
 	return p.primary()
 }
 

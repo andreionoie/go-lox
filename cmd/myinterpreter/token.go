@@ -105,6 +105,14 @@ func (tok Token) GetTokenAsTerminal() string {
 		return "+"
 	case Minus:
 		return "-"
+	case Greater:
+		return ">"
+	case Less:
+		return "<"
+	case GreaterEqual:
+		return ">="
+	case LessEqual:
+		return "<="
 	default:
 		panic("Unsupported terminal")
 	}

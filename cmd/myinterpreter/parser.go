@@ -10,7 +10,17 @@ func (p *Parser) Parse() Expr {
 }
 
 func (p *Parser) expression() Expr {
-	return p.term()
+	return p.comparison()
+}
+
+func (p *Parser) comparison() Expr {
+	leftTerm := p.term()
+	for p.match(Greater, Less, GreaterEqual, LessEqual) {
+		op := p.previous()
+		rightTerm := p.term()
+		leftTerm = &BinaryExpr{left: leftTerm, operator: op, right: rightTerm}
+	}
+	return leftTerm
 }
 
 // term -> factor ( ("+" | "-") factor )*

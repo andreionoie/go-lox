@@ -10,21 +10,32 @@ func (itp *AstInterpreter) VisitBinaryExpr(e *BinaryExpr) (result interface{}, e
 	leftExpr, err := e.left.Accept(itp)
 	rightExpr, err := e.right.Accept(itp)
 
-	leftNumber, okLeft := leftExpr.(float64)
-	rightNumber, okRight := rightExpr.(float64)
-	if !(okLeft && okRight) {
-		return nil, fmt.Errorf("cannot minus the expression '%v'", rightExpr)
-	}
+	leftNumber, okLeftNumber := leftExpr.(float64)
+	rightNumber, okRightNumber := rightExpr.(float64)
 
 	switch e.operator.Type {
-	case Star:
-		return leftNumber * rightNumber, err
-	case Slash:
-		return leftNumber / rightNumber, err
+	case Star, Slash, Minus:
+		if !(okLeftNumber && okRightNumber) {
+			return nil, fmt.Errorf("cannot operate the non-numbers '%v' and/or '%v'", leftExpr, rightExpr)
+		}
+
+		if e.operator.Type == Star {
+			return leftNumber * rightNumber, err
+		} else if e.operator.Type == Slash {
+			return leftNumber / rightNumber, err
+		} else if e.operator.Type == Minus {
+			return leftNumber - rightNumber, err
+		}
 	case Plus:
-		return leftNumber + rightNumber, err
-	case Minus:
-		return leftNumber - rightNumber, err
+		if okLeftNumber && okRightNumber {
+			return leftNumber + rightNumber, err
+		}
+		leftString, okLeft := leftExpr.(string)
+		rightString, okRight := rightExpr.(string)
+		if okLeft && okRight {
+			return leftString + rightString, err
+		}
+		return nil, fmt.Errorf("cannot plus the expressions '%v' with '%v'", leftExpr, rightExpr)
 	}
 	panic("Unsupported binary operator!")
 }

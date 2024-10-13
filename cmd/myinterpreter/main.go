@@ -64,7 +64,10 @@ func main() {
 			printer := &AstInterpreter{}
 
 			result, err := expr.Accept(printer)
-			fmt.Fprintln(os.Stderr, err)
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				os.Exit(70)
+			}
 			if result == nil {
 				fmt.Println("nil")
 			} else {

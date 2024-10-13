@@ -62,7 +62,7 @@ func (itp *AstInterpreter) VisitUnaryExpr(e *UnaryExpr) (result interface{}, err
 	case Minus:
 		rightNumber, ok := rightExpr.(float64)
 		if !ok {
-			return nil, fmt.Errorf("cannot minus the expression '%v'", rightExpr)
+			return nil, fmt.Errorf("Operand must be a number.")
 		}
 		return -rightNumber, err
 	}

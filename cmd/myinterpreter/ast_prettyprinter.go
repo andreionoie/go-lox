@@ -12,6 +12,10 @@ type AstPrettyPrinter struct {
 	StubExprVisitor
 }
 
+func (s *AstPrettyPrinter) Print(e Expr) {
+	fmt.Println(e.Accept(s))
+}
+
 func (s *AstPrettyPrinter) VisitBinaryExpr(e *BinaryExpr) (result interface{}, err error) {
 	return s.parenthesize(e.operator.Lexeme, e.left, e.right), nil
 }

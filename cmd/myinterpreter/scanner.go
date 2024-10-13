@@ -13,7 +13,6 @@ type Scanner struct {
 	Start       int
 	Current     int
 	CurrentLine int
-	HadErrors   bool
 }
 
 func (s *Scanner) ScanTokens() []Token {
@@ -184,7 +183,7 @@ func (s *Scanner) identifier() {
 func (s *Scanner) logError(msg string, a ...any) {
 	fmtString := fmt.Sprintf("[line %d] Error: %s\n", s.CurrentLine+1, msg)
 	fmt.Fprintf(os.Stderr, fmtString, a...)
-	s.HadErrors = true
+	LoxHadError = true
 }
 
 func (s *Scanner) isAtEnd() bool {

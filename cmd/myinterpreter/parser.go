@@ -5,9 +5,8 @@ import (
 )
 
 type Parser struct {
-	Tokens    []Token
-	Current   int
-	HadErrors bool
+	Tokens  []Token
+	Current int
 }
 
 func (p *Parser) Parse() (Expr, error) {
@@ -160,6 +159,6 @@ func (p *Parser) getError(msg string, a ...any) error {
 		currentToken = "'" + p.Tokens[p.Current].Lexeme + "'"
 	}
 
-	p.HadErrors = true
+	LoxHadError = true
 	return fmt.Errorf("[line %d] Error at %s: %s\n", p.Tokens[p.Current].Line+1, currentToken, fmt.Sprintf(msg, a...))
 }

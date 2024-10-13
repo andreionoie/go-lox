@@ -1,9 +1,26 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 type AstInterpreter struct {
 	StubExprVisitor
+}
+
+func (itp *AstInterpreter) Interpret(e Expr) {
+	result, err := e.Accept(itp)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		LoxHadRuntimeError = true
+	} else {
+		if result == nil {
+			fmt.Println("nil")
+		} else {
+			fmt.Println(result)
+		}
+	}
 }
 
 func (itp *AstInterpreter) VisitBinaryExpr(e *BinaryExpr) (result interface{}, err error) {
@@ -45,7 +62,7 @@ func (itp *AstInterpreter) VisitBinaryExpr(e *BinaryExpr) (result interface{}, e
 		if okLeft && okRight {
 			return leftString + rightString, err
 		}
-		return nil, fmt.Errorf("cannot plus the expressions '%v' with '%v'", leftExpr, rightExpr)
+		return nil, fmt.Errorf("Operands must be two numbers or two strings")
 	case EqualEqual:
 		return leftExpr == rightExpr, err
 	case BangEqual:

@@ -12,6 +12,9 @@ const evaluateCommand = "evaluate"
 
 var allowedCommands = []string{tokenizeCommand, parseCommand, evaluateCommand}
 
+var LoxHadError = false
+var LoxHadRuntimeError = false
+
 func main() {
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
 	fmt.Fprintln(os.Stderr, "Logs from your program will appear here!")
@@ -40,6 +43,9 @@ func main() {
 		tokens := scanner.ScanTokens()
 		parser := Parser{Tokens: tokens}
 
+		prettyPrinter := &AstPrettyPrinter{}
+		interpreter := &AstInterpreter{}
+
 		switch command {
 		case tokenizeCommand:
 			for _, tok := range tokens {
@@ -51,32 +57,21 @@ func main() {
 				fmt.Fprint(os.Stderr, err.Error())
 				break
 			}
-			printer := &AstPrettyPrinter{}
-
-			result, _ := expr.Accept(printer)
-			fmt.Println(result)
+			prettyPrinter.Print(expr)
 		case evaluateCommand:
 			expr, err := parser.Parse()
 			if err != nil {
 				fmt.Fprint(os.Stderr, err.Error())
 				break
 			}
-			printer := &AstInterpreter{}
-
-			result, err := expr.Accept(printer)
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				os.Exit(70)
-			}
-			if result == nil {
-				fmt.Println("nil")
-			} else {
-				fmt.Println(result)
-			}
+			interpreter.Interpret(expr)
 		}
 
-		if scanner.HadErrors || parser.HadErrors {
+		if LoxHadError {
 			os.Exit(65)
+		}
+		if LoxHadRuntimeError {
+			os.Exit(70)
 		}
 	}
 }

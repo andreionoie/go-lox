@@ -63,8 +63,13 @@ func main() {
 			}
 			printer := &AstInterpreter{}
 
-			result, _ := expr.Accept(printer)
-			fmt.Println(result)
+			result, err := expr.Accept(printer)
+			fmt.Fprintln(os.Stderr, err)
+			if result == nil {
+				fmt.Println("nil")
+			} else {
+				fmt.Println(result)
+			}
 		}
 
 		if scanner.HadErrors || parser.HadErrors {

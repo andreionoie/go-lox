@@ -104,8 +104,17 @@ func (p *Parser) unary() (Expr, error) {
 // primary -> NUMBER | STRING | "true" | "false" | "nil"
 // primary -> "(" expression ")"
 func (p *Parser) primary() (Expr, error) {
-	if p.match(Number, String, True, False, Nil) {
-		return &LiteralExpr{value: p.previous().GetTokenAsTerminal()}, nil
+	if p.match(True) {
+		return &LiteralExpr{value: true}, nil
+	}
+	if p.match(False) {
+		return &LiteralExpr{value: false}, nil
+	}
+	if p.match(Nil) {
+		return &LiteralExpr{value: nil}, nil
+	}
+	if p.match(Number, String) {
+		return &LiteralExpr{value: p.previous().Literal}, nil
 	}
 
 	if p.match(LeftParen) {

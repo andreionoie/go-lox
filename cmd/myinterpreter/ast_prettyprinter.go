@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 )
 
@@ -24,7 +25,22 @@ func (s *AstPrettyPrinter) VisitGroupingExpr(e *GroupingExpr) (result interface{
 }
 
 func (s *AstPrettyPrinter) VisitLiteralExpr(e *LiteralExpr) (result interface{}, err error) {
-	return fmt.Sprintf("%v", e.value), nil
+	var valueAsString string
+	switch v := e.value.(type) {
+	case float64:
+		// return smallest number of digits necessary
+		valueAsString = strconv.FormatFloat(v, 'f', -1, 64)
+		if !strings.Contains(valueAsString, ".") {
+			valueAsString += ".0"
+		}
+	case nil:
+		valueAsString = "nil"
+	default:
+		// Fallback for other types
+		valueAsString = fmt.Sprintf("%v", v)
+	}
+
+	return valueAsString, nil
 }
 
 func (p *AstPrettyPrinter) parenthesize(name string, exprs ...Expr) string {

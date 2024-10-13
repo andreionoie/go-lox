@@ -7,5 +7,9 @@ type AstInterpreter struct {
 }
 
 func (itp *AstInterpreter) VisitLiteralExpr(e *LiteralExpr) (result interface{}, err error) {
+	if e.value == nil {
+		return "nil", nil
+	}
+
 	return fmt.Sprintf("%v", e.value), nil
 }

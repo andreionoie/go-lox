@@ -173,9 +173,9 @@ func (s *Scanner) identifier() {
 	for !s.isAtEnd() && (unicode.IsLetter(s.Source[s.Current]) || unicode.IsNumber(s.Source[s.Current]) || s.Source[s.Current] == '_') {
 		s.Current++
 	}
-	keyword, ok := ReservedKeywords[string(s.Source[s.Start:s.Current])]
+	keywordTokenType, ok := ReservedKeywords[string(s.Source[s.Start:s.Current])]
 	if ok {
-		s.addToken(keyword)
+		s.addToken(keywordTokenType)
 	} else {
 		s.addToken(Identifier)
 	}

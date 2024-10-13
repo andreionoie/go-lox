@@ -46,6 +46,10 @@ func (itp *AstInterpreter) VisitBinaryExpr(e *BinaryExpr) (result interface{}, e
 			return leftString + rightString, err
 		}
 		return nil, fmt.Errorf("cannot plus the expressions '%v' with '%v'", leftExpr, rightExpr)
+	case EqualEqual:
+		return leftExpr == rightExpr, err
+	case BangEqual:
+		return leftExpr != rightExpr, err
 	}
 	panic("Unsupported binary operator!")
 }

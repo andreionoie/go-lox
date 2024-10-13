@@ -35,11 +35,9 @@ func main() {
 	}
 
 	if len(fileContents) >= 0 {
-		scanner := Scanner{
-			Source: []rune(string(fileContents)),
-		}
-
+		scanner := Scanner{Source: []rune(string(fileContents))}
 		tokens := scanner.ScanTokens()
+		parser := Parser{Tokens: tokens}
 
 		switch command {
 		case tokenizeCommand:
@@ -47,15 +45,18 @@ func main() {
 				fmt.Println(tok)
 			}
 		case parseCommand:
-			parser := Parser{Tokens: tokens}
-			expr := parser.Parse()
+			expr, err := parser.Parse()
+			if err != nil {
+				fmt.Fprint(os.Stderr, err.Error())
+				break
+			}
 			printer := &AstPrettyPrinter{}
 
 			result, _ := expr.Accept(printer)
 			fmt.Println(result)
 		}
 
-		if scanner.HadErrors {
+		if scanner.HadErrors || parser.HadErrors {
 			os.Exit(65)
 		}
 	}

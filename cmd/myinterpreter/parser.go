@@ -1,69 +1,101 @@
 package main
 
+import (
+	"fmt"
+)
+
 type Parser struct {
-	Tokens  []Token
-	Current int
+	Tokens    []Token
+	Current   int
+	HadErrors bool
 }
 
-func (p *Parser) Parse() Expr {
+func (p *Parser) Parse() (Expr, error) {
 	return p.expression()
 }
 
-func (p *Parser) expression() Expr {
+func (p *Parser) expression() (Expr, error) {
 	return p.equality()
 }
 
 // equality -> comparison ( ("==" | "!=") comparison)*
-func (p *Parser) equality() Expr {
-	leftCmp := p.comparison()
+func (p *Parser) equality() (Expr, error) {
+	leftCmp, err := p.comparison()
+	if err != nil {
+		return nil, err
+	}
 	for p.match(EqualEqual, BangEqual) {
 		op := p.previous()
-		rightCmp := p.comparison()
+		rightCmp, err := p.comparison()
+		if err != nil {
+			return nil, err
+		}
 		leftCmp = &BinaryExpr{left: leftCmp, operator: op, right: rightCmp}
 	}
-	return leftCmp
+	return leftCmp, nil
 }
 
 // comparison -> term ( (>|<|<=|>=) term )*
-func (p *Parser) comparison() Expr {
-	leftTerm := p.term()
+func (p *Parser) comparison() (Expr, error) {
+	leftTerm, err := p.term()
+	if err != nil {
+		return nil, err
+	}
 	for p.match(Greater, Less, GreaterEqual, LessEqual) {
 		op := p.previous()
-		rightTerm := p.term()
+		rightTerm, err := p.term()
+		if err != nil {
+			return nil, err
+		}
 		leftTerm = &BinaryExpr{left: leftTerm, operator: op, right: rightTerm}
 	}
-	return leftTerm
+	return leftTerm, nil
 }
 
 // term -> factor ( ("+" | "-") factor )*
-func (p *Parser) term() Expr {
-	leftFactor := p.factor()
+func (p *Parser) term() (Expr, error) {
+	leftFactor, err := p.factor()
+	if err != nil {
+		return nil, err
+	}
 	for p.match(Plus, Minus) { // this "while" loop represents the * suffix in the notation
 		op := p.previous()
-		rightFactor := p.factor()
+		rightFactor, err := p.factor()
+		if err != nil {
+			return nil, err
+		}
 		leftFactor = &BinaryExpr{left: leftFactor, operator: op, right: rightFactor}
 	}
-	return leftFactor
+	return leftFactor, nil
 }
 
 // factor -> unary ( ("*" | "/") unary )*
-func (p *Parser) factor() Expr {
-	leftUnary := p.unary()
+func (p *Parser) factor() (Expr, error) {
+	leftUnary, err := p.unary()
+	if err != nil {
+		return nil, err
+	}
 	for p.match(Star, Slash) { // this "while" loop represents the * suffix in the notation
 		op := p.previous()
-		rightUnary := p.unary()
+		rightUnary, err := p.unary()
+		if err != nil {
+			return nil, err
+		}
 		leftUnary = &BinaryExpr{left: leftUnary, operator: op, right: rightUnary}
 	}
-	return leftUnary
+	return leftUnary, nil
 }
 
 // unary -> ("-" | "!") unary
 // unary -> primary
-func (p *Parser) unary() Expr {
+func (p *Parser) unary() (Expr, error) {
 	if p.match(Minus, Bang) {
 		op := p.previous()
-		nestedUnary := p.unary()
-		return &UnaryExpr{operator: op, right: nestedUnary}
+		nestedUnary, err := p.unary()
+		if err != nil {
+			return nil, err
+		}
+		return &UnaryExpr{operator: op, right: nestedUnary}, nil
 	}
 
 	return p.primary()
@@ -71,22 +103,25 @@ func (p *Parser) unary() Expr {
 
 // primary -> NUMBER | STRING | "true" | "false" | "nil"
 // primary -> "(" expression ")"
-func (p *Parser) primary() Expr {
+func (p *Parser) primary() (Expr, error) {
 	if p.match(Number, String, True, False, Nil) {
-		return &LiteralExpr{value: p.previous().GetTokenAsTerminal()}
+		return &LiteralExpr{value: p.previous().GetTokenAsTerminal()}, nil
 	}
 
 	if p.match(LeftParen) {
-		grouping := p.expression()
+		grouping, err := p.expression()
+		if err != nil {
+			return nil, err
+		}
 		p.Current++
 		if p.previous().Type != RightParen {
-			panic("TODO: implement error handling")
+			return nil, p.getError("Expect ')' after expression.")
 		}
 
-		return &GroupingExpr{expr: grouping}
+		return &GroupingExpr{expr: grouping}, nil
 	}
 
-	panic("TODO: implement error handling")
+	return nil, p.getError("Expect expression.")
 }
 
 func (p *Parser) previous() Token {
@@ -106,4 +141,16 @@ func (p *Parser) match(tokenTypes ...TokenType) bool {
 	}
 
 	return false
+}
+
+func (p *Parser) getError(msg string, a ...any) error {
+	var currentToken string
+	if p.Tokens[p.Current].Type == Eof {
+		currentToken = "end"
+	} else {
+		currentToken = "'" + p.Tokens[p.Current].Lexeme + "'"
+	}
+
+	p.HadErrors = true
+	return fmt.Errorf("[line %d] Error at %s: %s\n", p.Tokens[p.Current].Line+1, currentToken, fmt.Sprintf(msg, a...))
 }

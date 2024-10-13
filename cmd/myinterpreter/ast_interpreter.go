@@ -6,6 +6,25 @@ type AstInterpreter struct {
 	StubExprVisitor
 }
 
+func (itp *AstInterpreter) VisitBinaryExpr(e *BinaryExpr) (result interface{}, err error) {
+	leftExpr, err := e.left.Accept(itp)
+	rightExpr, err := e.right.Accept(itp)
+
+	leftNumber, okLeft := leftExpr.(float64)
+	rightNumber, okRight := rightExpr.(float64)
+	if !(okLeft && okRight) {
+		return nil, fmt.Errorf("cannot minus the expression '%v'", rightExpr)
+	}
+
+	switch e.operator.Type {
+	case Star:
+		return leftNumber * rightNumber, err
+	case Slash:
+		return leftNumber / rightNumber, err
+	}
+	panic("Unsupported binary operator!")
+}
+
 func (itp *AstInterpreter) VisitUnaryExpr(e *UnaryExpr) (result interface{}, err error) {
 	rightExpr, err := e.right.Accept(itp)
 	switch e.operator.Type {

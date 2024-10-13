@@ -21,6 +21,10 @@ func (itp *AstInterpreter) VisitBinaryExpr(e *BinaryExpr) (result interface{}, e
 		return leftNumber * rightNumber, err
 	case Slash:
 		return leftNumber / rightNumber, err
+	case Plus:
+		return leftNumber + rightNumber, err
+	case Minus:
+		return leftNumber - rightNumber, err
 	}
 	panic("Unsupported binary operator!")
 }

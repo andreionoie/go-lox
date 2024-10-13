@@ -16,7 +16,7 @@ func (itp *AstInterpreter) VisitBinaryExpr(e *BinaryExpr) (result interface{}, e
 	switch e.operator.Type {
 	case Star, Slash, Minus, Greater, GreaterEqual, Less, LessEqual:
 		if !(okLeftNumber && okRightNumber) {
-			return nil, fmt.Errorf("cannot operate the non-numbers '%v' and/or '%v'", leftExpr, rightExpr)
+			return nil, fmt.Errorf("Operands must be numbers.")
 		}
 
 		switch e.operator.Type {

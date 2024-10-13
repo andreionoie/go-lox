@@ -8,8 +8,9 @@ import (
 
 const tokenizeCommand = "tokenize"
 const parseCommand = "parse"
+const evaluateCommand = "evaluate"
 
-var allowedCommands = []string{tokenizeCommand, parseCommand}
+var allowedCommands = []string{tokenizeCommand, parseCommand, evaluateCommand}
 
 func main() {
 	// You can use print statements as follows for debugging, they'll be visible when running tests.
@@ -51,6 +52,16 @@ func main() {
 				break
 			}
 			printer := &AstPrettyPrinter{}
+
+			result, _ := expr.Accept(printer)
+			fmt.Println(result)
+		case evaluateCommand:
+			expr, err := parser.Parse()
+			if err != nil {
+				fmt.Fprint(os.Stderr, err.Error())
+				break
+			}
+			printer := &AstInterpreter{}
 
 			result, _ := expr.Accept(printer)
 			fmt.Println(result)

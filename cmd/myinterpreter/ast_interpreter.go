@@ -14,18 +14,28 @@ func (itp *AstInterpreter) VisitBinaryExpr(e *BinaryExpr) (result interface{}, e
 	rightNumber, okRightNumber := rightExpr.(float64)
 
 	switch e.operator.Type {
-	case Star, Slash, Minus:
+	case Star, Slash, Minus, Greater, GreaterEqual, Less, LessEqual:
 		if !(okLeftNumber && okRightNumber) {
 			return nil, fmt.Errorf("cannot operate the non-numbers '%v' and/or '%v'", leftExpr, rightExpr)
 		}
 
-		if e.operator.Type == Star {
+		switch e.operator.Type {
+		case Star:
 			return leftNumber * rightNumber, err
-		} else if e.operator.Type == Slash {
+		case Slash:
 			return leftNumber / rightNumber, err
-		} else if e.operator.Type == Minus {
+		case Minus:
 			return leftNumber - rightNumber, err
+		case Greater:
+			return leftNumber > rightNumber, err
+		case GreaterEqual:
+			return leftNumber >= rightNumber, err
+		case Less:
+			return leftNumber < rightNumber, err
+		case LessEqual:
+			return leftNumber <= rightNumber, err
 		}
+		panic("unreachable")
 	case Plus:
 		if okLeftNumber && okRightNumber {
 			return leftNumber + rightNumber, err

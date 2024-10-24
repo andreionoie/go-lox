@@ -7,9 +7,20 @@ import (
 
 type AstInterpreter struct {
 	StubExprVisitor
+	StubStmtVisitor
 }
 
-func (itp *AstInterpreter) Interpret(e Expr) {
+func (itp *AstInterpreter) Interpret(stmts []Stmt) {
+	for _, stmt := range stmts {
+		_, err := stmt.Accept(itp)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			LoxHadRuntimeError = true
+		}
+	}
+}
+
+func (itp *AstInterpreter) InterpretExpr(e Expr) {
 	result, err := e.Accept(itp)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
@@ -21,6 +32,23 @@ func (itp *AstInterpreter) Interpret(e Expr) {
 			fmt.Println(result)
 		}
 	}
+}
+
+func (itp *AstInterpreter) VisitPrintStmt(s *PrintStmt) (result interface{}, err error) {
+	result, err = s.expression.Accept(itp)
+	if err == nil {
+		if result == nil {
+			fmt.Println("nil")
+		} else {
+			fmt.Println(result)
+		}
+	}
+	return nil, nil
+}
+
+func (itp *AstInterpreter) VisitExpressionStmt(s *ExpressionStmt) (result interface{}, err error) {
+	s.expression.Accept(itp)
+	return nil, nil
 }
 
 func (itp *AstInterpreter) VisitBinaryExpr(e *BinaryExpr) (result interface{}, err error) {

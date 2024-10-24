@@ -9,7 +9,53 @@ type Parser struct {
 	Current int
 }
 
-func (p *Parser) Parse() (Expr, error) {
+func (p *Parser) Parse() ([]Stmt, error) {
+	var statements []Stmt
+	for p.Tokens[p.Current].Type != Eof {
+		nextStmt, err := p.statement()
+		if err != nil {
+			return nil, err
+		}
+		statements = append(statements, nextStmt)
+	}
+	return statements, nil
+}
+
+func (p *Parser) statement() (Stmt, error) {
+	if p.match(Print) {
+		return p.printStatement()
+	}
+
+	return p.expressionStatement()
+}
+
+// PrintStmt -> "print" Expr ";"
+func (p *Parser) printStatement() (Stmt, error) {
+	value, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+	p.Current++
+	if p.previous().Type != Semicolon {
+		return nil, p.getError("Expect ';' after value.")
+	}
+	return &PrintStmt{value}, nil
+}
+
+// ExprStmt -> Expr ";"
+func (p *Parser) expressionStatement() (Stmt, error) {
+	value, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+	p.Current++
+	if p.previous().Type != Semicolon {
+		return nil, p.getError("Expect ';' after expression.")
+	}
+	return &ExpressionStmt{value}, nil
+}
+
+func (p *Parser) ParseExpr() (Expr, error) {
 	return p.expression()
 }
 

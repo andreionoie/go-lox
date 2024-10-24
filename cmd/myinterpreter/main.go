@@ -9,8 +9,9 @@ import (
 const tokenizeCommand = "tokenize"
 const parseCommand = "parse"
 const evaluateCommand = "evaluate"
+const runCommand = "run"
 
-var allowedCommands = []string{tokenizeCommand, parseCommand, evaluateCommand}
+var allowedCommands = []string{tokenizeCommand, parseCommand, evaluateCommand, runCommand}
 
 var LoxHadError = false
 var LoxHadRuntimeError = false
@@ -52,19 +53,26 @@ func main() {
 				fmt.Println(tok)
 			}
 		case parseCommand:
-			expr, err := parser.Parse()
+			expr, err := parser.ParseExpr()
 			if err != nil {
 				fmt.Fprint(os.Stderr, err.Error())
 				break
 			}
-			prettyPrinter.Print(expr)
+			prettyPrinter.PrintExpr(expr)
 		case evaluateCommand:
-			expr, err := parser.Parse()
+			expr, err := parser.ParseExpr()
 			if err != nil {
 				fmt.Fprint(os.Stderr, err.Error())
 				break
 			}
-			interpreter.Interpret(expr)
+			interpreter.InterpretExpr(expr)
+		case runCommand:
+			stmts, err := parser.Parse()
+			if err != nil {
+				fmt.Fprint(os.Stderr, err.Error())
+				break
+			}
+			interpreter.Interpret(stmts)
 		}
 
 		if LoxHadError {

@@ -10,10 +10,22 @@ import (
 type AstPrettyPrinter struct {
 	// embed the stub to implement all functions
 	StubExprVisitor
+	StubStmtVisitor
 }
 
-func (s *AstPrettyPrinter) Print(e Expr) {
-	fmt.Println(e.Accept(s))
+func (s *AstPrettyPrinter) Print(stmts []Stmt) {
+	for _, stmt := range stmts {
+		fmt.Println(stmt.Accept(s))
+	}
+}
+
+func (s *AstPrettyPrinter) VisitPrintStmt(stmt *PrintStmt) (result interface{}, err error) {
+	return stmt.expression.Accept(s)
+}
+
+func (s *AstPrettyPrinter) PrintExpr(e Expr) {
+	result, _ := e.Accept(s)
+	fmt.Println(result)
 }
 
 func (s *AstPrettyPrinter) VisitBinaryExpr(e *BinaryExpr) (result interface{}, err error) {

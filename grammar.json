@@ -27,6 +27,19 @@
           "body": [{ "type": "interface{}", "name": "value" }]
         }
       ]
+    },
+    {
+      "baseName": "Stmt",
+      "productions": [
+        {
+          "head": "Expression",
+          "body": [{ "type": "Expr", "name": "expression" }]
+        },
+        {
+          "head": "Print",
+          "body": [{ "type": "Expr", "name": "expression" }]
+        }
+      ]
     }
   ]
 }

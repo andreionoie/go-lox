@@ -95,3 +95,53 @@ func (b *LiteralExpr) Accept(visitor ExprVisitor) (result interface{}, err error
 }
 
 var _ Expr = (*LiteralExpr)(nil)
+
+// define the base Stmt (5.2.2 Metaprogramming the trees)
+type Stmt interface {
+	// define the abstract accept() function (5.3.3 Visitors for expressions)
+	Accept(visitor StmtVisitor) (result interface{}, err error)
+}
+
+// define the visitor interface (5.3.3 Visitors for expressions)
+type StmtVisitor interface {
+	VisitExpressionStmt(v *ExpressionStmt) (result interface{}, err error)
+
+	VisitPrintStmt(v *PrintStmt) (result interface{}, err error)
+}
+
+type StubStmtVisitor struct{}
+
+// type assertion to ensure stub implements all
+var _ StmtVisitor = StubStmtVisitor{}
+
+func (s StubStmtVisitor) VisitExpressionStmt(_ *ExpressionStmt) (result interface{}, err error) {
+	return nil, errors.New("visit func for ExpressionStmt is not implemented")
+}
+
+func (s StubStmtVisitor) VisitPrintStmt(_ *PrintStmt) (result interface{}, err error) {
+	return nil, errors.New("visit func for PrintStmt is not implemented")
+}
+
+// define the subtype Expression (5.2.2 Metaprogramming the trees)
+type ExpressionStmt struct {
+	expression Expr
+}
+
+// each subtype implements the abstract accept() and calls the right visit method (5.3.3 Visitors for expressions)
+func (b *ExpressionStmt) Accept(visitor StmtVisitor) (result interface{}, err error) {
+	return visitor.VisitExpressionStmt(b)
+}
+
+var _ Stmt = (*ExpressionStmt)(nil)
+
+// define the subtype Print (5.2.2 Metaprogramming the trees)
+type PrintStmt struct {
+	expression Expr
+}
+
+// each subtype implements the abstract accept() and calls the right visit method (5.3.3 Visitors for expressions)
+func (b *PrintStmt) Accept(visitor StmtVisitor) (result interface{}, err error) {
+	return visitor.VisitPrintStmt(b)
+}
+
+var _ Stmt = (*PrintStmt)(nil)

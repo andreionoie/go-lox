@@ -16,6 +16,7 @@ func (itp *AstInterpreter) Interpret(stmts []Stmt) {
 		if err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			LoxHadRuntimeError = true
+			return
 		}
 	}
 }
@@ -43,12 +44,12 @@ func (itp *AstInterpreter) VisitPrintStmt(s *PrintStmt) (result interface{}, err
 			fmt.Println(result)
 		}
 	}
-	return nil, nil
+	return nil, err
 }
 
 func (itp *AstInterpreter) VisitExpressionStmt(s *ExpressionStmt) (result interface{}, err error) {
-	s.expression.Accept(itp)
-	return nil, nil
+	_, err = s.expression.Accept(itp)
+	return nil, err
 }
 
 func (itp *AstInterpreter) VisitBinaryExpr(e *BinaryExpr) (result interface{}, err error) {

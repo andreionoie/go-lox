@@ -12,13 +12,49 @@ type Parser struct {
 func (p *Parser) Parse() ([]Stmt, error) {
 	var statements []Stmt
 	for p.Tokens[p.Current].Type != Eof {
-		nextStmt, err := p.statement()
+		nextStmt, err := p.declaration()
 		if err != nil {
 			return nil, err
 		}
 		statements = append(statements, nextStmt)
 	}
 	return statements, nil
+}
+
+func (p *Parser) declaration() (nextStmt Stmt, err error) {
+	if p.match(Var) {
+		nextStmt, err = p.varDeclaration()
+	} else {
+		nextStmt, err = p.statement()
+	}
+
+	if err != nil {
+		p.synchronize()
+	}
+	return nextStmt, err
+}
+
+func (p *Parser) varDeclaration() (Stmt, error) {
+	p.Current++
+	if p.previous().Type != Identifier {
+		return nil, p.getError("Expect variable name.")
+	}
+	variableName := p.previous()
+	var initializer Expr
+	// optional initializer expr after '=' sign
+	if p.match(Equal) {
+		var err error
+		initializer, err = p.expression()
+		if err != nil {
+			return nil, err
+		}
+	}
+	p.Current++
+	if p.previous().Type != Semicolon {
+		return nil, p.getError("Expect ';' after variable declaration.")
+	}
+
+	return &VarStmt{varName: variableName, initializerExpression: initializer}, nil
 }
 
 func (p *Parser) statement() (Stmt, error) {
@@ -148,6 +184,7 @@ func (p *Parser) unary() (Expr, error) {
 
 // primary -> NUMBER | STRING | "true" | "false" | "nil"
 // primary -> "(" expression ")"
+// primary -> IDENTIFIER (variable)
 func (p *Parser) primary() (Expr, error) {
 	if p.match(True) {
 		return &LiteralExpr{value: true}, nil
@@ -175,7 +212,14 @@ func (p *Parser) primary() (Expr, error) {
 		return &GroupingExpr{expr: grouping}, nil
 	}
 
+	if p.match(Identifier) {
+		return &VariableExpr{variableName: p.previous()}, nil
+	}
+
 	return nil, p.getError("Expect expression.")
+}
+
+func (p *Parser) synchronize() {
 }
 
 func (p *Parser) previous() Token {
@@ -199,12 +243,15 @@ func (p *Parser) match(tokenTypes ...TokenType) bool {
 
 func (p *Parser) getError(msg string, a ...any) error {
 	var currentToken string
-	if p.Tokens[p.Current].Type == Eof {
+	var line int
+	if p.Current >= len(p.Tokens) || p.Tokens[p.Current].Type == Eof {
 		currentToken = "end"
+		line = p.Tokens[len(p.Tokens)-1].Line
 	} else {
 		currentToken = "'" + p.Tokens[p.Current].Lexeme + "'"
+		line = p.Tokens[p.Current].Line
 	}
 
 	LoxHadError = true
-	return fmt.Errorf("[line %d] Error at %s: %s\n", p.Tokens[p.Current].Line+1, currentToken, fmt.Sprintf(msg, a...))
+	return fmt.Errorf("[line %d] Error at %s: %s\n", line+1, currentToken, fmt.Sprintf(msg, a...))
 }

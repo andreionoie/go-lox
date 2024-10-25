@@ -19,6 +19,8 @@ type ExprVisitor interface {
 	VisitGroupingExpr(v *GroupingExpr) (result interface{}, err error)
 
 	VisitLiteralExpr(v *LiteralExpr) (result interface{}, err error)
+
+	VisitVariableExpr(v *VariableExpr) (result interface{}, err error)
 }
 
 type StubExprVisitor struct{}
@@ -40,6 +42,10 @@ func (s StubExprVisitor) VisitGroupingExpr(_ *GroupingExpr) (result interface{},
 
 func (s StubExprVisitor) VisitLiteralExpr(_ *LiteralExpr) (result interface{}, err error) {
 	return nil, errors.New("visit func for LiteralExpr is not implemented")
+}
+
+func (s StubExprVisitor) VisitVariableExpr(_ *VariableExpr) (result interface{}, err error) {
+	return nil, errors.New("visit func for VariableExpr is not implemented")
 }
 
 // define the subtype Binary (5.2.2 Metaprogramming the trees)
@@ -96,6 +102,18 @@ func (b *LiteralExpr) Accept(visitor ExprVisitor) (result interface{}, err error
 
 var _ Expr = (*LiteralExpr)(nil)
 
+// define the subtype Variable (5.2.2 Metaprogramming the trees)
+type VariableExpr struct {
+	variableName Token
+}
+
+// each subtype implements the abstract accept() and calls the right visit method (5.3.3 Visitors for expressions)
+func (b *VariableExpr) Accept(visitor ExprVisitor) (result interface{}, err error) {
+	return visitor.VisitVariableExpr(b)
+}
+
+var _ Expr = (*VariableExpr)(nil)
+
 // define the base Stmt (5.2.2 Metaprogramming the trees)
 type Stmt interface {
 	// define the abstract accept() function (5.3.3 Visitors for expressions)
@@ -107,6 +125,8 @@ type StmtVisitor interface {
 	VisitExpressionStmt(v *ExpressionStmt) (result interface{}, err error)
 
 	VisitPrintStmt(v *PrintStmt) (result interface{}, err error)
+
+	VisitVarStmt(v *VarStmt) (result interface{}, err error)
 }
 
 type StubStmtVisitor struct{}
@@ -120,6 +140,10 @@ func (s StubStmtVisitor) VisitExpressionStmt(_ *ExpressionStmt) (result interfac
 
 func (s StubStmtVisitor) VisitPrintStmt(_ *PrintStmt) (result interface{}, err error) {
 	return nil, errors.New("visit func for PrintStmt is not implemented")
+}
+
+func (s StubStmtVisitor) VisitVarStmt(_ *VarStmt) (result interface{}, err error) {
+	return nil, errors.New("visit func for VarStmt is not implemented")
 }
 
 // define the subtype Expression (5.2.2 Metaprogramming the trees)
@@ -145,3 +169,17 @@ func (b *PrintStmt) Accept(visitor StmtVisitor) (result interface{}, err error) 
 }
 
 var _ Stmt = (*PrintStmt)(nil)
+
+// define the subtype Var (5.2.2 Metaprogramming the trees)
+type VarStmt struct {
+	varName Token
+
+	initializerExpression Expr
+}
+
+// each subtype implements the abstract accept() and calls the right visit method (5.3.3 Visitors for expressions)
+func (b *VarStmt) Accept(visitor StmtVisitor) (result interface{}, err error) {
+	return visitor.VisitVarStmt(b)
+}
+
+var _ Stmt = (*VarStmt)(nil)

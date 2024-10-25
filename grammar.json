@@ -25,6 +25,10 @@
         {
           "head": "Literal",
           "body": [{ "type": "interface{}", "name": "value" }]
+        },
+        {
+          "head": "Variable",
+          "body": [{ "type": "Token", "name": "variableName" }]
         }
       ]
     },
@@ -38,6 +42,13 @@
         {
           "head": "Print",
           "body": [{ "type": "Expr", "name": "expression" }]
+        },
+        {
+          "head": "Var",
+          "body": [
+            { "type": "Token", "name": "varName" },
+            { "type": "Expr", "name": "initializerExpression" }
+          ]
         }
       ]
     }

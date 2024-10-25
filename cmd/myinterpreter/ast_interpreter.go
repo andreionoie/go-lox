@@ -8,9 +8,11 @@ import (
 type AstInterpreter struct {
 	StubExprVisitor
 	StubStmtVisitor
+	Env Environment
 }
 
 func (itp *AstInterpreter) Interpret(stmts []Stmt) {
+	itp.Env = Environment{Values: make(map[string]interface{})}
 	for _, stmt := range stmts {
 		_, err := stmt.Accept(itp)
 		if err != nil {
@@ -35,6 +37,16 @@ func (itp *AstInterpreter) InterpretExpr(e Expr) {
 	}
 }
 
+func (itp *AstInterpreter) VisitVarStmt(s *VarStmt) (result interface{}, err error) {
+	var varValue interface{}
+	if s.initializerExpression != nil {
+		varValue, err = s.initializerExpression.Accept(itp)
+	}
+
+	itp.Env.define(s.varName.Lexeme, varValue)
+	return nil, err
+}
+
 func (itp *AstInterpreter) VisitPrintStmt(s *PrintStmt) (result interface{}, err error) {
 	result, err = s.expression.Accept(itp)
 	if err == nil {
@@ -48,8 +60,12 @@ func (itp *AstInterpreter) VisitPrintStmt(s *PrintStmt) (result interface{}, err
 }
 
 func (itp *AstInterpreter) VisitExpressionStmt(s *ExpressionStmt) (result interface{}, err error) {
-	_, err = s.expression.Accept(itp)
-	return nil, err
+	result, err = s.expression.Accept(itp)
+	return result, err
+}
+
+func (itp *AstInterpreter) VisitVariableExpr(e *VariableExpr) (result interface{}, err error) {
+	return itp.Env.get(e.variableName)
 }
 
 func (itp *AstInterpreter) VisitBinaryExpr(e *BinaryExpr) (result interface{}, err error) {

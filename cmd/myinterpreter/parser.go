@@ -96,7 +96,32 @@ func (p *Parser) ParseExpr() (Expr, error) {
 }
 
 func (p *Parser) expression() (Expr, error) {
-	return p.equality()
+	return p.assignment()
+}
+
+// assignment -> IDENTIFIER "=" assignment (left assoc.)
+// assignment -> equality
+func (p *Parser) assignment() (Expr, error) {
+	leftEquality, err := p.equality()
+	if err != nil {
+		return nil, err
+	}
+
+	if p.match(Equal) {
+		value, err := p.assignment()
+		if err != nil {
+			return nil, err
+		}
+
+		if variableExpr, ok := leftEquality.(*VariableExpr); ok {
+			lvalueToken := variableExpr.variableName
+			return &AssignExpr{variableName: lvalueToken, assignValue: value}, nil
+		}
+
+		return nil, p.getError("Invalid assignment target.")
+	}
+
+	return leftEquality, nil
 }
 
 // equality -> comparison ( ("==" | "!=") comparison)*

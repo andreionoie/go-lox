@@ -64,6 +64,16 @@ func (itp *AstInterpreter) VisitExpressionStmt(s *ExpressionStmt) (result interf
 	return result, err
 }
 
+func (itp *AstInterpreter) VisitAssignExpr(e *AssignExpr) (result interface{}, err error) {
+	result, err = e.assignValue.Accept(itp)
+	assignErr := itp.Env.assign(e.variableName, result)
+	if assignErr != nil {
+		return nil, assignErr
+	}
+
+	return result, err
+}
+
 func (itp *AstInterpreter) VisitVariableExpr(e *VariableExpr) (result interface{}, err error) {
 	return itp.Env.get(e.variableName)
 }

@@ -21,6 +21,8 @@ type ExprVisitor interface {
 	VisitLiteralExpr(v *LiteralExpr) (result interface{}, err error)
 
 	VisitVariableExpr(v *VariableExpr) (result interface{}, err error)
+
+	VisitAssignExpr(v *AssignExpr) (result interface{}, err error)
 }
 
 type StubExprVisitor struct{}
@@ -46,6 +48,10 @@ func (s StubExprVisitor) VisitLiteralExpr(_ *LiteralExpr) (result interface{}, e
 
 func (s StubExprVisitor) VisitVariableExpr(_ *VariableExpr) (result interface{}, err error) {
 	return nil, errors.New("visit func for VariableExpr is not implemented")
+}
+
+func (s StubExprVisitor) VisitAssignExpr(_ *AssignExpr) (result interface{}, err error) {
+	return nil, errors.New("visit func for AssignExpr is not implemented")
 }
 
 // define the subtype Binary (5.2.2 Metaprogramming the trees)
@@ -113,6 +119,20 @@ func (b *VariableExpr) Accept(visitor ExprVisitor) (result interface{}, err erro
 }
 
 var _ Expr = (*VariableExpr)(nil)
+
+// define the subtype Assign (5.2.2 Metaprogramming the trees)
+type AssignExpr struct {
+	variableName Token
+
+	assignValue Expr
+}
+
+// each subtype implements the abstract accept() and calls the right visit method (5.3.3 Visitors for expressions)
+func (b *AssignExpr) Accept(visitor ExprVisitor) (result interface{}, err error) {
+	return visitor.VisitAssignExpr(b)
+}
+
+var _ Expr = (*AssignExpr)(nil)
 
 // define the base Stmt (5.2.2 Metaprogramming the trees)
 type Stmt interface {

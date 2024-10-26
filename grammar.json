@@ -29,6 +29,13 @@
         {
           "head": "Variable",
           "body": [{ "type": "Token", "name": "variableName" }]
+        },
+        {
+          "head": "Assign",
+          "body": [
+            { "type": "Token", "name": "variableName" },
+            { "type": "Expr", "name": "assignValue" }
+          ]
         }
       ]
     },

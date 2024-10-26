@@ -61,8 +61,30 @@ func (p *Parser) statement() (Stmt, error) {
 	if p.match(Print) {
 		return p.printStatement()
 	}
+	if p.match(LeftBrace) {
+		stmts, err := p.block()
+		return &BlockStmt{statements: stmts}, err
+	}
 
 	return p.expressionStatement()
+}
+
+func (p *Parser) block() ([]Stmt, error) {
+	var stmts []Stmt
+
+	for (p.Current < len(p.Tokens)) && (p.Tokens[p.Current].Type != Eof) && (p.Tokens[p.Current].Type) != RightBrace {
+		stmt, err := p.declaration()
+		if err != nil {
+			return nil, err
+		}
+		stmts = append(stmts, stmt)
+	}
+
+	p.Current++
+	if p.previous().Type != RightBrace {
+		return nil, p.getError("Expect '}' after block.")
+	}
+	return stmts, nil
 }
 
 // PrintStmt -> "print" Expr ";"

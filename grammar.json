@@ -56,6 +56,10 @@
             { "type": "Token", "name": "varName" },
             { "type": "Expr", "name": "initializerExpression" }
           ]
+        },
+        {
+          "head": "Block",
+          "body": [{ "type": "[]Stmt", "name": "statements" }]
         }
       ]
     }

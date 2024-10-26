@@ -37,13 +37,28 @@ func (itp *AstInterpreter) InterpretExpr(e Expr) {
 	}
 }
 
+func (itp *AstInterpreter) VisitBlockStmt(s *BlockStmt) (result interface{}, err error) {
+	previousEnv := itp.Env
+	itp.Env = itp.Env.Clone()
+	defer func() { itp.Env = previousEnv }()
+
+	for _, stmt := range s.statements {
+		result, err = stmt.Accept(itp)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return nil, err
+}
+
 func (itp *AstInterpreter) VisitVarStmt(s *VarStmt) (result interface{}, err error) {
 	var varValue interface{}
 	if s.initializerExpression != nil {
 		varValue, err = s.initializerExpression.Accept(itp)
 	}
 
-	itp.Env.define(s.varName.Lexeme, varValue)
+	itp.Env.Define(s.varName.Lexeme, varValue)
 	return nil, err
 }
 
@@ -66,7 +81,7 @@ func (itp *AstInterpreter) VisitExpressionStmt(s *ExpressionStmt) (result interf
 
 func (itp *AstInterpreter) VisitAssignExpr(e *AssignExpr) (result interface{}, err error) {
 	result, err = e.assignValue.Accept(itp)
-	assignErr := itp.Env.assign(e.variableName, result)
+	assignErr := itp.Env.Assign(e.variableName, result)
 	if assignErr != nil {
 		return nil, assignErr
 	}
@@ -75,7 +90,7 @@ func (itp *AstInterpreter) VisitAssignExpr(e *AssignExpr) (result interface{}, e
 }
 
 func (itp *AstInterpreter) VisitVariableExpr(e *VariableExpr) (result interface{}, err error) {
-	return itp.Env.get(e.variableName)
+	return itp.Env.Get(e.variableName)
 }
 
 func (itp *AstInterpreter) VisitBinaryExpr(e *BinaryExpr) (result interface{}, err error) {

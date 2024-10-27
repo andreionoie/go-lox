@@ -173,6 +173,8 @@ type StmtVisitor interface {
 	VisitBlockStmt(v *BlockStmt) (result interface{}, err error)
 
 	VisitIfStmt(v *IfStmt) (result interface{}, err error)
+
+	VisitWhileStmt(v *WhileStmt) (result interface{}, err error)
 }
 
 type StubStmtVisitor struct{}
@@ -198,6 +200,10 @@ func (s StubStmtVisitor) VisitBlockStmt(_ *BlockStmt) (result interface{}, err e
 
 func (s StubStmtVisitor) VisitIfStmt(_ *IfStmt) (result interface{}, err error) {
 	return nil, errors.New("visit func for IfStmt is not implemented")
+}
+
+func (s StubStmtVisitor) VisitWhileStmt(_ *WhileStmt) (result interface{}, err error) {
+	return nil, errors.New("visit func for WhileStmt is not implemented")
 }
 
 // define the subtype Expression (5.2.2 Metaprogramming the trees)
@@ -265,3 +271,17 @@ func (b *IfStmt) Accept(visitor StmtVisitor) (result interface{}, err error) {
 }
 
 var _ Stmt = (*IfStmt)(nil)
+
+// define the subtype While (5.2.2 Metaprogramming the trees)
+type WhileStmt struct {
+	condition Expr
+
+	loopBody Stmt
+}
+
+// each subtype implements the abstract accept() and calls the right visit method (5.3.3 Visitors for expressions)
+func (b *WhileStmt) Accept(visitor StmtVisitor) (result interface{}, err error) {
+	return visitor.VisitWhileStmt(b)
+}
+
+var _ Stmt = (*WhileStmt)(nil)

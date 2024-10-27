@@ -23,6 +23,27 @@ func (itp *AstInterpreter) Interpret(stmts []Stmt) {
 	}
 }
 
+func (itp *AstInterpreter) VisitWhileStmt(s *WhileStmt) (result interface{}, err error) {
+	condResult, err := s.condition.Accept(itp)
+	if err != nil {
+		return nil, err
+	}
+
+	for isTruthy(condResult) {
+		_, err = s.loopBody.Accept(itp)
+		if err != nil {
+			return nil, err
+		}
+
+		condResult, err = s.condition.Accept(itp)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return nil, nil
+}
+
 func (itp *AstInterpreter) VisitIfStmt(s *IfStmt) (result interface{}, err error) {
 	condResult, err := s.condition.Accept(itp)
 	if err != nil {

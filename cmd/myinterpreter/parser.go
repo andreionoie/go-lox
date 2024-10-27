@@ -68,6 +68,9 @@ func (p *Parser) statement() (Stmt, error) {
 	if p.match(If) {
 		return p.ifStatement()
 	}
+	if p.match(While) {
+		return p.whileStatement()
+	}
 
 	return p.expressionStatement()
 }
@@ -88,6 +91,34 @@ func (p *Parser) block() ([]Stmt, error) {
 		return nil, p.getError("Expect '}' after block.")
 	}
 	return stmts, nil
+}
+
+// WhileStmt -> "while" "(" Expr ")" statement
+func (p *Parser) whileStatement() (Stmt, error) {
+	p.Current++
+	if p.previous().Type != LeftParen {
+		return nil, p.getError("Expect '(' after 'while'.")
+	}
+
+	cond, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+
+	p.Current++
+	if p.previous().Type != RightParen {
+		return nil, p.getError("Expect ')' after while condition.")
+	}
+
+	body, err := p.statement()
+	if err != nil {
+		return nil, err
+	}
+
+	return &WhileStmt{
+		condition: cond,
+		loopBody:  body,
+	}, nil
 }
 
 // IfStmt -> "if" "(" Expr ")" statement ("else" statement)?

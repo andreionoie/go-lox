@@ -76,6 +76,13 @@
             { "type": "Stmt", "name": "thenBranch" },
             { "type": "Stmt", "name": "elseBranch" }
           ]
+        },
+        {
+          "head": "While",
+          "body": [
+            { "type": "Expr", "name": "condition" },
+            { "type": "Stmt", "name": "loopBody" }
+          ]
         }
       ]
     }

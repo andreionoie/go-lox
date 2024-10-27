@@ -71,6 +71,9 @@ func (p *Parser) statement() (Stmt, error) {
 	if p.match(While) {
 		return p.whileStatement()
 	}
+	if p.match(For) {
+		return p.forStatement()
+	}
 
 	return p.expressionStatement()
 }
@@ -91,6 +94,73 @@ func (p *Parser) block() ([]Stmt, error) {
 		return nil, p.getError("Expect '}' after block.")
 	}
 	return stmts, nil
+}
+
+// ForStmt -> "for" "(" (VarDecl | Expr ";")?  Expr? ";" Expr? ")" statement
+func (p *Parser) forStatement() (Stmt, error) {
+	hadNoErrors := !LoxHadError
+	// initialization is a variable declaration or expression statement
+	// consume '('
+	p.Current++
+	if p.previous().Type != LeftParen {
+		return nil, p.getError("Expect '(' after 'for'.")
+	}
+
+	// read initialization expression
+	var initialization Stmt
+	if p.match(Semicolon) {
+		initialization = nil
+	} else {
+		if p.match(Var) {
+			initialization, _ = p.varDeclaration()
+		} else {
+			initialization, _ = p.expressionStatement()
+		}
+	}
+
+	// read condition expression
+	var condition Expr
+	if p.match(Semicolon) {
+		condition = nil
+	} else {
+		condition, _ = p.expression()
+		p.Current++
+		if p.previous().Type != Semicolon {
+			return nil, p.getError("Expect ';' after for condition.")
+		}
+	}
+
+	var iteration Expr
+	if p.match(RightParen) {
+		iteration = nil
+	} else {
+		iteration, _ = p.expression()
+		if iteration == nil {
+			// no expression found; advance
+			p.Current++
+		}
+		// consume ')'
+		p.Current++
+		if p.previous().Type != RightParen {
+			return nil, p.getError("Expect ')' after for header.")
+		}
+	}
+
+	if hadNoErrors {
+		LoxHadError = false
+	}
+
+	body, err := p.statement()
+	if err != nil {
+		return nil, err
+	}
+
+	return &ForStmt{
+		init:      initialization,
+		condition: condition,
+		iteration: iteration,
+		loopBody:  body,
+	}, nil
 }
 
 // WhileStmt -> "while" "(" Expr ")" statement

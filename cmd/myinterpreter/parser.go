@@ -96,8 +96,10 @@ func (p *Parser) block() ([]Stmt, error) {
 	return stmts, nil
 }
 
+// TODO: refactor, find better implementation
 // ForStmt -> "for" "(" (VarDecl | Expr ";")?  Expr? ";" Expr? ")" statement
 func (p *Parser) forStatement() (Stmt, error) {
+	// TODO: fix bug where errors get set when trying to parse empty for header element
 	hadNoErrors := !LoxHadError
 	// initialization is a variable declaration or expression statement
 	// consume '('

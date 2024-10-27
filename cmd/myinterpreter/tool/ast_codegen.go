@@ -11,22 +11,22 @@ import (
 )
 
 type Grammar struct {
-	AstDefinitions []AstDefinition `json:"astDefinitions"`
+	AST_DEFINITIONS []AstDefinition `json:"astDefinitions"`
 }
 
 type AstDefinition struct {
-	BaseName    string       `json:"baseName"`
-	Productions []Production `json:"productions"`
+	BASE_NAME   string       `json:"baseName"`
+	PRODUCTIONS []Production `json:"productions"`
 }
 
 type Production struct {
-	Head string     `json:"head"`
-	Body []BodyItem `json:"body"`
+	HEAD string     `json:"head"`
+	BODY []BodyItem `json:"body"`
 }
 
 type BodyItem struct {
-	Type string `json:"type"`
-	Name string `json:"name"`
+	TYPE string `json:"type"`
+	NAME string `json:"name"`
 }
 
 const codeTemplate = `
@@ -35,49 +35,49 @@ const codeTemplate = `
 package main
 import "errors"
 
-{{ range .AstDefinitions }}
-{{ $astDefinition := . }}
-{{ $visitorInterfaceName := print $astDefinition.BaseName "Visitor" }}
-	// define the base {{ $astDefinition.BaseName }} (5.2.2 Metaprogramming the trees)
-	type {{ $astDefinition.BaseName }} interface {
+{{ range .AST_DEFINITIONS }}
+{{ $L_AST_DEFINITION := . }}
+{{ $L_VISITOR_INTERFACE := print $L_AST_DEFINITION.BASE_NAME "Visitor" }}
+	// define the base {{ $L_AST_DEFINITION.BASE_NAME }} (5.2.2 Metaprogramming the trees)
+	type {{ $L_AST_DEFINITION.BASE_NAME }} interface {
 		// define the abstract accept() function (5.3.3 Visitors for expressions)
-		Accept(visitor {{ $visitorInterfaceName }}) (result interface{}, err error)
+		Accept(visitor {{ $L_VISITOR_INTERFACE }}) (result interface{}, err error)
 	}
 
 	// define the visitor interface (5.3.3 Visitors for expressions)
-	type {{ $visitorInterfaceName }} interface {
-		{{ range $astDefinition.Productions }}
-		{{ $productionFullName := print .Head $astDefinition.BaseName }}
-			Visit{{ $productionFullName }}(v *{{ $productionFullName }}) (result interface{}, err error)
+	type {{ $L_VISITOR_INTERFACE }} interface {
+		{{ range $L_AST_DEFINITION.PRODUCTIONS }}
+		{{ $L_PRODUCTION_NAME := print .HEAD $L_AST_DEFINITION.BASE_NAME }}
+			Visit{{ $L_PRODUCTION_NAME }}(v *{{ $L_PRODUCTION_NAME }}) (result interface{}, err error)
 		{{ end }}
 	}
 
-	type Stub{{ $visitorInterfaceName }} struct{}
+	type Stub{{ $L_VISITOR_INTERFACE }} struct{}
 	// type assertion to ensure stub implements all
-	var _ {{ $visitorInterfaceName }} = Stub{{ $visitorInterfaceName }} {}
+	var _ {{ $L_VISITOR_INTERFACE }} = Stub{{ $L_VISITOR_INTERFACE }} {}
 
-	{{ range $astDefinition.Productions }}
-	{{ $productionFullName := print .Head $astDefinition.BaseName }}
-		func (s Stub{{ $visitorInterfaceName }}) Visit{{ $productionFullName }}(_ *{{ $productionFullName }}) (result interface{}, err error) {
-			return nil, errors.New("visit func for {{ $productionFullName }} is not implemented")
+	{{ range $L_AST_DEFINITION.PRODUCTIONS }}
+	{{ $L_PRODUCTION_NAME := print .HEAD $L_AST_DEFINITION.BASE_NAME }}
+		func (s Stub{{ $L_VISITOR_INTERFACE }}) Visit{{ $L_PRODUCTION_NAME }}(_ *{{ $L_PRODUCTION_NAME }}) (result interface{}, err error) {
+			return nil, errors.New("visit func for {{ $L_PRODUCTION_NAME }} is not implemented")
 		}
 	{{ end }}
 
-	{{ range $astDefinition.Productions }}
-	{{ $productionFullName := print .Head $astDefinition.BaseName }}
-		// define the subtype {{ .Head }} (5.2.2 Metaprogramming the trees)
-		type {{ $productionFullName }} struct {
-			{{ range .Body }}
-				{{ .Name }} {{ .Type }}
+	{{ range $L_AST_DEFINITION.PRODUCTIONS }}
+	{{ $L_PRODUCTION_NAME := print .HEAD $L_AST_DEFINITION.BASE_NAME }}
+		// define the subtype {{ .HEAD }} (5.2.2 Metaprogramming the trees)
+		type {{ $L_PRODUCTION_NAME }} struct {
+			{{ range .BODY }}
+				{{ .NAME }} {{ .TYPE }}
 			{{ end }}
 		}
 
 		// each subtype implements the abstract accept() and calls the right visit method (5.3.3 Visitors for expressions)
-		func (b *{{ $productionFullName }}) Accept(visitor {{ $visitorInterfaceName }}) (result interface{}, err error) {
-			return visitor.Visit{{ $productionFullName }}(b)
+		func (b *{{ $L_PRODUCTION_NAME }}) Accept(visitor {{ $L_VISITOR_INTERFACE }}) (result interface{}, err error) {
+			return visitor.Visit{{ $L_PRODUCTION_NAME }}(b)
 		}
 
-		var _ {{ $astDefinition.BaseName }} = (* {{ $productionFullName }} ) (nil)
+		var _ {{ $L_AST_DEFINITION.BASE_NAME }} = (* {{ $L_PRODUCTION_NAME }} ) (nil)
 	{{ end }}
 
 {{ end }}

@@ -23,6 +23,7 @@ func (itp *AstInterpreter) Interpret(stmts []Stmt) {
 	}
 }
 
+// TODO: fix useless result for statements (remove)
 func (itp *AstInterpreter) VisitForStmt(s *ForStmt) (result interface{}, err error) {
 	if s.init != nil {
 		_, err = s.init.Accept(itp)

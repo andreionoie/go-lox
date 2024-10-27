@@ -6,10 +6,12 @@ import (
 	"slices"
 )
 
-const tokenizeCommand = "tokenize"
-const parseCommand = "parse"
-const evaluateCommand = "evaluate"
-const runCommand = "run"
+const (
+	tokenizeCommand = "tokenize"
+	parseCommand    = "parse"
+	evaluateCommand = "evaluate"
+	runCommand      = "run"
+)
 
 var allowedCommands = []string{tokenizeCommand, parseCommand, evaluateCommand, runCommand}
 

@@ -157,14 +157,15 @@ func (p *Parser) ParseExpr() (Expr, error) {
 	return p.expression()
 }
 
+// expression -> assignment
 func (p *Parser) expression() (Expr, error) {
 	return p.assignment()
 }
 
 // assignment -> IDENTIFIER "=" assignment (left assoc.)
-// assignment -> equality
+// assignment -> logicalOr
 func (p *Parser) assignment() (Expr, error) {
-	leftEquality, err := p.equality()
+	lvalue, err := p.logicalOr()
 	if err != nil {
 		return nil, err
 	}
@@ -175,12 +176,63 @@ func (p *Parser) assignment() (Expr, error) {
 			return nil, err
 		}
 
-		if variableExpr, ok := leftEquality.(*VariableExpr); ok {
+		if variableExpr, ok := lvalue.(*VariableExpr); ok {
 			lvalueToken := variableExpr.variableName
-			return &AssignExpr{variableName: lvalueToken, assignValue: value}, nil
+			return &AssignExpr{
+				variableName: lvalueToken,
+				assignValue:  value,
+			}, nil
 		}
 
 		return nil, p.getError("Invalid assignment target.")
+	}
+
+	return lvalue, nil
+}
+
+// logicalOr -> logicalAnd ("or" logicalAnd)*
+func (p *Parser) logicalOr() (Expr, error) {
+	leftAnd, err := p.logicalAnd()
+	if err != nil {
+		return nil, err
+	}
+
+	for p.match(Or) {
+		orOperator := p.previous()
+		rightAnd, err := p.logicalAnd()
+		if err != nil {
+			return nil, err
+		}
+
+		leftAnd = &LogicalExpr{
+			left:     leftAnd,
+			operator: orOperator,
+			right:    rightAnd,
+		}
+	}
+
+	return leftAnd, nil
+}
+
+// logicalAnd -> equality ("and" equality)*
+func (p *Parser) logicalAnd() (Expr, error) {
+	leftEquality, err := p.equality()
+	if err != nil {
+		return nil, err
+	}
+
+	for p.match(And) {
+		andOperator := p.previous()
+		rightEquality, err := p.equality()
+		if err != nil {
+			return nil, err
+		}
+
+		leftEquality = &LogicalExpr{
+			left:     leftEquality,
+			operator: andOperator,
+			right:    rightEquality,
+		}
 	}
 
 	return leftEquality, nil

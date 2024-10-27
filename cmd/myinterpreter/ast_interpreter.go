@@ -23,20 +23,6 @@ func (itp *AstInterpreter) Interpret(stmts []Stmt) {
 	}
 }
 
-func (itp *AstInterpreter) InterpretExpr(e Expr) {
-	result, err := e.Accept(itp)
-	if err != nil {
-		fmt.Fprintln(os.Stderr, err)
-		LoxHadRuntimeError = true
-	} else {
-		if result == nil {
-			fmt.Println("nil")
-		} else {
-			fmt.Println(result)
-		}
-	}
-}
-
 func (itp *AstInterpreter) VisitIfStmt(s *IfStmt) (result interface{}, err error) {
 	condResult, err := s.condition.Accept(itp)
 	if err != nil {
@@ -96,6 +82,42 @@ func (itp *AstInterpreter) VisitPrintStmt(s *PrintStmt) (result interface{}, err
 func (itp *AstInterpreter) VisitExpressionStmt(s *ExpressionStmt) (result interface{}, err error) {
 	result, err = s.expression.Accept(itp)
 	return result, err
+}
+
+func (itp *AstInterpreter) InterpretExpr(e Expr) {
+	result, err := e.Accept(itp)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		LoxHadRuntimeError = true
+	} else {
+		if result == nil {
+			fmt.Println("nil")
+		} else {
+			fmt.Println(result)
+		}
+	}
+}
+
+func (itp *AstInterpreter) VisitLogicalExpr(e *LogicalExpr) (result interface{}, err error) {
+	leftResult, err := e.left.Accept(itp)
+	if err != nil {
+		return nil, err
+	}
+
+	// short-circuit
+	if e.operator.Type == And {
+		if !isTruthy(leftResult) {
+			return false, nil
+		}
+	} else if e.operator.Type == Or {
+		if isTruthy(leftResult) {
+			return leftResult, nil
+		}
+	} else {
+		panic("Unsupported logical operator " + e.operator.Lexeme)
+	}
+
+	return e.right.Accept(itp)
 }
 
 func (itp *AstInterpreter) VisitAssignExpr(e *AssignExpr) (result interface{}, err error) {

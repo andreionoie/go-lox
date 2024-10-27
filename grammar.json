@@ -36,6 +36,14 @@
             { "type": "Token", "name": "variableName" },
             { "type": "Expr", "name": "assignValue" }
           ]
+        },
+        {
+          "head": "Logical",
+          "body": [
+            { "type": "Expr", "name": "left" },
+            { "type": "Token", "name": "operator" },
+            { "type": "Expr", "name": "right" }
+          ]
         }
       ]
     },

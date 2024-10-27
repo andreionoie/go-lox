@@ -149,6 +149,8 @@ type StmtVisitor interface {
 	VisitVarStmt(v *VarStmt) (result interface{}, err error)
 
 	VisitBlockStmt(v *BlockStmt) (result interface{}, err error)
+
+	VisitIfStmt(v *IfStmt) (result interface{}, err error)
 }
 
 type StubStmtVisitor struct{}
@@ -170,6 +172,10 @@ func (s StubStmtVisitor) VisitVarStmt(_ *VarStmt) (result interface{}, err error
 
 func (s StubStmtVisitor) VisitBlockStmt(_ *BlockStmt) (result interface{}, err error) {
 	return nil, errors.New("visit func for BlockStmt is not implemented")
+}
+
+func (s StubStmtVisitor) VisitIfStmt(_ *IfStmt) (result interface{}, err error) {
+	return nil, errors.New("visit func for IfStmt is not implemented")
 }
 
 // define the subtype Expression (5.2.2 Metaprogramming the trees)
@@ -221,3 +227,19 @@ func (b *BlockStmt) Accept(visitor StmtVisitor) (result interface{}, err error) 
 }
 
 var _ Stmt = (*BlockStmt)(nil)
+
+// define the subtype If (5.2.2 Metaprogramming the trees)
+type IfStmt struct {
+	condition Expr
+
+	thenBranch Stmt
+
+	elseBranch Stmt
+}
+
+// each subtype implements the abstract accept() and calls the right visit method (5.3.3 Visitors for expressions)
+func (b *IfStmt) Accept(visitor StmtVisitor) (result interface{}, err error) {
+	return visitor.VisitIfStmt(b)
+}
+
+var _ Stmt = (*IfStmt)(nil)

@@ -60,6 +60,14 @@
         {
           "head": "Block",
           "body": [{ "type": "[]Stmt", "name": "statements" }]
+        },
+        {
+          "head": "If",
+          "body": [
+            { "type": "Expr", "name": "condition" },
+            { "type": "Stmt", "name": "thenBranch" },
+            { "type": "Stmt", "name": "elseBranch" }
+          ]
         }
       ]
     }

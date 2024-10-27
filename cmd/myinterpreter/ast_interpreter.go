@@ -37,6 +37,22 @@ func (itp *AstInterpreter) InterpretExpr(e Expr) {
 	}
 }
 
+func (itp *AstInterpreter) VisitIfStmt(s *IfStmt) (result interface{}, err error) {
+	condResult, err := s.condition.Accept(itp)
+	if err != nil {
+		return nil, err
+	}
+
+	if isTruthy(condResult) {
+		return s.thenBranch.Accept(itp)
+	} else if s.elseBranch != nil {
+		return s.elseBranch.Accept(itp)
+	}
+
+	// if cond was false and no else branch, noop
+	return nil, nil
+}
+
 func (itp *AstInterpreter) VisitBlockStmt(s *BlockStmt) (result interface{}, err error) {
 	previousEnv := itp.Env
 	itp.Env = Environment{

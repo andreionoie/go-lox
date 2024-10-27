@@ -65,6 +65,9 @@ func (p *Parser) statement() (Stmt, error) {
 		stmts, err := p.block()
 		return &BlockStmt{statements: stmts}, err
 	}
+	if p.match(If) {
+		return p.ifStatement()
+	}
 
 	return p.expressionStatement()
 }
@@ -85,6 +88,43 @@ func (p *Parser) block() ([]Stmt, error) {
 		return nil, p.getError("Expect '}' after block.")
 	}
 	return stmts, nil
+}
+
+// IfStmt -> "if" "(" Expr ")" statement ("else" statement)?
+func (p *Parser) ifStatement() (Stmt, error) {
+	p.Current++
+	if p.previous().Type != LeftParen {
+		return nil, p.getError("Expect '(' after 'if'.")
+	}
+
+	cond, err := p.expression()
+	if err != nil {
+		return nil, err
+	}
+
+	p.Current++
+	if p.previous().Type != RightParen {
+		return nil, p.getError("Expect ')' after if condition.")
+	}
+
+	thenStmt, err := p.statement()
+	if err != nil {
+		return nil, err
+	}
+
+	var elseStmt Stmt
+	if p.match(Else) {
+		elseStmt, err = p.statement()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &IfStmt{
+		condition:  cond,
+		thenBranch: thenStmt,
+		elseBranch: elseStmt,
+	}, nil
 }
 
 // PrintStmt -> "print" Expr ";"
@@ -267,6 +307,20 @@ func (p *Parser) primary() (Expr, error) {
 }
 
 func (p *Parser) synchronize() {
+	// discard everything until finding a new statement boundary
+	p.Current++
+	for p.Current < len(p.Tokens) && p.Tokens[p.Current].Type != Eof {
+		if p.previous().Type == Semicolon {
+			return
+		}
+
+		switch p.Tokens[p.Current].Type {
+		case Class, Function, Var, For, If, While, Print, Return:
+			return
+		}
+
+		p.Current++
+	}
 }
 
 func (p *Parser) previous() Token {

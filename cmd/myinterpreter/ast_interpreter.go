@@ -39,7 +39,10 @@ func (itp *AstInterpreter) InterpretExpr(e Expr) {
 
 func (itp *AstInterpreter) VisitBlockStmt(s *BlockStmt) (result interface{}, err error) {
 	previousEnv := itp.Env
-	itp.Env = itp.Env.Clone()
+	itp.Env = Environment{
+		Enclosing: &previousEnv,
+		Values:    make(map[string]interface{}),
+	}
 	defer func() { itp.Env = previousEnv }()
 
 	for _, stmt := range s.statements {

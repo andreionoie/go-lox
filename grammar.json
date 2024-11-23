@@ -74,6 +74,14 @@
           ]
         },
         {
+          "head": "Function",
+          "body": [
+            { "type": "Token", "name": "name" },
+            { "type": "[]Token", "name": "parameters" },
+            { "type": "[]Stmt", "name": "body" }
+          ]
+        },
+        {
           "head": "Block",
           "body": [{ "type": "[]Stmt", "name": "statements" }]
         },

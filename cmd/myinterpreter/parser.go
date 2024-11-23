@@ -23,7 +23,9 @@ func (p *Parser) Parse() ([]Stmt, error) {
 }
 
 func (p *Parser) declaration() (nextStmt Stmt, err error) {
-	if p.match(Var) {
+	if p.match(Function) {
+		nextStmt, err = p.funcDeclaration()
+	} else if p.match(Var) {
 		nextStmt, err = p.varDeclaration()
 	} else {
 		nextStmt, err = p.statement()
@@ -33,6 +35,62 @@ func (p *Parser) declaration() (nextStmt Stmt, err error) {
 		p.synchronize()
 	}
 	return nextStmt, err
+}
+
+// funDecl -> "fun" IDENTIFIER "(" parameters? ")" block
+func (p *Parser) funcDeclaration() (Stmt, error) {
+	p.Current++
+	if p.previous().Type != Identifier {
+		return nil, p.getError("Expect function name.")
+	}
+	funcName := p.previous()
+
+	p.Current++
+	if p.previous().Type != LeftParen {
+		return nil, p.getError("Expect '(' after function name.")
+	}
+
+	var params []Token
+	if p.Tokens[p.Current].Type != RightParen {
+		p.Current++
+		if p.previous().Type != Identifier {
+			return nil, p.getError("Expect parameter name.")
+		}
+
+		params = []Token{p.previous()}
+		for p.match(Comma) {
+			p.Current++
+			if p.previous().Type != Identifier {
+				return nil, p.getError("Expect parameter name.")
+			}
+			params = append(params, p.previous())
+
+			if len(params) > 255 {
+				fmt.Fprintln(os.Stderr, p.getError("Can't have more than 255 parameters."))
+			}
+		}
+	}
+
+	p.Current++
+	if p.previous().Type != RightParen {
+		return nil, p.getError("Expect ')' after parameters.")
+	}
+
+	p.Current++
+	if p.previous().Type != LeftBrace {
+		return nil, p.getError("Expect '{' before function body.")
+	}
+
+	funcBody, err := p.block()
+	if err != nil {
+		return nil, err
+	}
+
+	return &FunctionStmt{
+		name:       funcName,
+		parameters: params,
+		body:       funcBody,
+	}, nil
 }
 
 func (p *Parser) varDeclaration() (Stmt, error) {

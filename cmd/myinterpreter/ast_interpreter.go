@@ -37,6 +37,12 @@ func (itp *AstInterpreter) Interpret(stmts []Stmt) {
 	}
 }
 
+func (itp *AstInterpreter) VisitFunctionStmt(s *FunctionStmt) (result interface{}, err error) {
+	loxFunc := &LoxFunction{s}
+	itp.env.Define(s.name.Lexeme, loxFunc)
+	return nil, nil
+}
+
 // TODO: fix useless result for statements (remove)
 func (itp *AstInterpreter) VisitForStmt(s *ForStmt) (result interface{}, err error) {
 	if s.init != nil {

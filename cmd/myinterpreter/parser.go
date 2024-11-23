@@ -133,6 +133,9 @@ func (p *Parser) statement() (Stmt, error) {
 	if p.match(For) {
 		return p.forStatement()
 	}
+	if p.match(Return) {
+		return p.returnStatement()
+	}
 
 	return p.expressionStatement()
 }
@@ -153,6 +156,24 @@ func (p *Parser) block() ([]Stmt, error) {
 		return nil, p.getError("Expect '}' after block.")
 	}
 	return stmts, nil
+}
+
+func (p *Parser) returnStatement() (s Stmt, err error) {
+	var expr Expr
+	if p.Tokens[p.Current].Type != Semicolon {
+		expr, err = p.expression()
+		if err != nil {
+			return nil, err
+		}
+	}
+	p.Current++
+	if p.previous().Type != Semicolon {
+		return nil, p.getError("Expect ';' after return.")
+	}
+
+	return &ReturnStmt{
+		expression: expr,
+	}, nil
 }
 
 // TODO: refactor, find better implementation

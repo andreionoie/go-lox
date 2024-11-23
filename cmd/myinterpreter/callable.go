@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"time"
 )
 
@@ -44,8 +45,14 @@ func (lf LoxFunction) Call(itp *AstInterpreter, arguments []interface{}) (interf
 		itp.env.Define(lf.declaration.parameters[i].Lexeme, arguments[i])
 	}
 
-	for _, funcStmt := range lf.declaration.body {
-		funcStmt.Accept(itp)
+	for _, bodyStmt := range lf.declaration.body {
+		_, err := bodyStmt.Accept(itp)
+		if err != nil {
+			if returnBubbledUp, ok := err.(*ReturnBubbleUp); ok {
+				return returnBubbledUp.Value, nil
+			}
+			fmt.Fprintln(os.Stderr, err)
+		}
 	}
 
 	return nil, nil
@@ -53,4 +60,12 @@ func (lf LoxFunction) Call(itp *AstInterpreter, arguments []interface{}) (interf
 
 func (lf LoxFunction) String() string {
 	return fmt.Sprintf("<fn %s>", lf.declaration.name.Lexeme)
+}
+
+type ReturnBubbleUp struct {
+	Value interface{}
+}
+
+func (r *ReturnBubbleUp) Error() string {
+	return "return statement - everything OK, no errors"
 }

@@ -82,6 +82,10 @@
           ]
         },
         {
+          "head": "Return",
+          "body": [{ "type": "Expr", "name": "expression" }]
+        },
+        {
           "head": "Block",
           "body": [{ "type": "[]Stmt", "name": "statements" }]
         },

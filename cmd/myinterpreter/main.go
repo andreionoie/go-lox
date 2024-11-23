@@ -47,7 +47,7 @@ func main() {
 		parser := Parser{Tokens: tokens}
 
 		prettyPrinter := &AstPrettyPrinter{}
-		interpreter := &AstInterpreter{}
+		interpreter := NewInterpreter()
 
 		switch command {
 		case tokenizeCommand:

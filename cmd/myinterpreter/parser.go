@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 )
 
 type Parser struct {
@@ -410,7 +411,7 @@ func (p *Parser) factor() (Expr, error) {
 }
 
 // unary -> ("-" | "!") unary
-// unary -> primary
+// unary -> call
 func (p *Parser) unary() (Expr, error) {
 	if p.match(Minus, Bang) {
 		op := p.previous()
@@ -421,7 +422,58 @@ func (p *Parser) unary() (Expr, error) {
 		return &UnaryExpr{operator: op, right: nestedUnary}, nil
 	}
 
-	return p.primary()
+	return p.call()
+}
+
+// call -> primary ( "(" arguments? ")" )*
+func (p *Parser) call() (Expr, error) {
+	primaryExpr, err := p.primary()
+	if err != nil {
+		return nil, err
+	}
+
+	for p.match(LeftParen) {
+		primaryExpr, err = p.finishCall(primaryExpr)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return primaryExpr, nil
+}
+
+func (p *Parser) finishCall(callee Expr) (Expr, error) {
+	var args []Expr
+	if p.Tokens[p.Current].Type != RightParen {
+		firstArg, err := p.expression()
+		if err != nil {
+			return nil, err
+		}
+		args = []Expr{firstArg}
+
+		for p.match(Comma) {
+			nextArg, err := p.expression()
+			if err != nil {
+				return nil, err
+			}
+			args = append(args, nextArg)
+
+			if len(args) > 255 {
+				fmt.Fprintln(os.Stderr, p.getError("Can't have more than 255 arguments."))
+			}
+		}
+	}
+
+	p.Current++
+	if p.previous().Type != RightParen {
+		return nil, p.getError("Expect ')' after arguments.")
+	}
+
+	return &CallExpr{
+		callee:       callee,
+		arguments:    args,
+		closingParen: p.previous(),
+	}, nil
 }
 
 // primary -> NUMBER | STRING | "true" | "false" | "nil"

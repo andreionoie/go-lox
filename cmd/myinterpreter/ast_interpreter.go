@@ -3,16 +3,30 @@ package main
 import (
 	"fmt"
 	"os"
+	"strconv"
 )
 
 type AstInterpreter struct {
 	StubExprVisitor
 	StubStmtVisitor
-	Env Environment
+	Globals *Environment
+	env     *Environment
+}
+
+func NewInterpreter() *AstInterpreter {
+	initialEnv := &Environment{
+		Values: make(map[string]interface{}),
+	}
+
+	initialEnv.Define("clock", ClockFunc{})
+
+	return &AstInterpreter{
+		Globals: initialEnv,
+		env:     initialEnv,
+	}
 }
 
 func (itp *AstInterpreter) Interpret(stmts []Stmt) {
-	itp.Env = Environment{Values: make(map[string]interface{})}
 	for _, stmt := range stmts {
 		_, err := stmt.Accept(itp)
 		if err != nil {
@@ -104,12 +118,12 @@ func (itp *AstInterpreter) VisitIfStmt(s *IfStmt) (result interface{}, err error
 }
 
 func (itp *AstInterpreter) VisitBlockStmt(s *BlockStmt) (result interface{}, err error) {
-	previousEnv := itp.Env
-	itp.Env = Environment{
-		Enclosing: &previousEnv,
+	previousEnv := itp.env
+	itp.env = &Environment{
+		Enclosing: previousEnv,
 		Values:    make(map[string]interface{}),
 	}
-	defer func() { itp.Env = previousEnv }()
+	defer func() { itp.env = previousEnv }()
 
 	for _, stmt := range s.statements {
 		result, err = stmt.Accept(itp)
@@ -127,18 +141,14 @@ func (itp *AstInterpreter) VisitVarStmt(s *VarStmt) (result interface{}, err err
 		varValue, err = s.initializerExpression.Accept(itp)
 	}
 
-	itp.Env.Define(s.varName.Lexeme, varValue)
+	itp.env.Define(s.varName.Lexeme, varValue)
 	return nil, err
 }
 
 func (itp *AstInterpreter) VisitPrintStmt(s *PrintStmt) (result interface{}, err error) {
 	result, err = s.expression.Accept(itp)
 	if err == nil {
-		if result == nil {
-			fmt.Println("nil")
-		} else {
-			fmt.Println(result)
-		}
+		fmt.Println(loxStringify(result))
 	}
 	return nil, err
 }
@@ -160,6 +170,37 @@ func (itp *AstInterpreter) InterpretExpr(e Expr) {
 			fmt.Println(result)
 		}
 	}
+}
+
+func (itp *AstInterpreter) VisitCallExpr(e *CallExpr) (result interface{}, err error) {
+	callee, err := e.callee.Accept(itp)
+	if err != nil {
+		return nil, err
+	}
+	var args []interface{}
+	for _, arg := range e.arguments {
+		argResult, err := arg.Accept(itp)
+		if err != nil {
+			return nil, err
+		}
+
+		args = append(args, argResult)
+	}
+
+	if function, ok := callee.(LoxCallable); ok {
+		if function.Arity() != len(args) {
+			return nil, fmt.Errorf("Expected %d arguments but got %d.", function.Arity(), len(args))
+		}
+
+		callResult, err := function.Call(itp, args)
+		if err != nil {
+			return nil, err
+		}
+
+		return callResult, nil
+	}
+
+	return nil, fmt.Errorf("Can only call functions and classes.")
 }
 
 func (itp *AstInterpreter) VisitLogicalExpr(e *LogicalExpr) (result interface{}, err error) {
@@ -186,7 +227,7 @@ func (itp *AstInterpreter) VisitLogicalExpr(e *LogicalExpr) (result interface{},
 
 func (itp *AstInterpreter) VisitAssignExpr(e *AssignExpr) (result interface{}, err error) {
 	result, err = e.assignValue.Accept(itp)
-	assignErr := itp.Env.Assign(e.variableName, result)
+	assignErr := itp.env.Assign(e.variableName, result)
 	if assignErr != nil {
 		return nil, assignErr
 	}
@@ -195,7 +236,7 @@ func (itp *AstInterpreter) VisitAssignExpr(e *AssignExpr) (result interface{}, e
 }
 
 func (itp *AstInterpreter) VisitVariableExpr(e *VariableExpr) (result interface{}, err error) {
-	return itp.Env.Get(e.variableName)
+	return itp.env.Get(e.variableName)
 }
 
 func (itp *AstInterpreter) VisitBinaryExpr(e *BinaryExpr) (result interface{}, err error) {
@@ -279,4 +320,15 @@ func isTruthy(val interface{}) bool {
 	}
 
 	return true
+}
+
+func loxStringify(value interface{}) string {
+	switch val := value.(type) {
+	case nil:
+		return "nil"
+	case float64:
+		return strconv.FormatFloat(val, 'f', -1, 64)
+	default:
+		return fmt.Sprintf("%v", val)
+	}
 }

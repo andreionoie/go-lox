@@ -44,6 +44,14 @@
             { "type": "Token", "name": "operator" },
             { "type": "Expr", "name": "right" }
           ]
+        },
+        {
+          "head": "Call",
+          "body": [
+            { "type": "Expr", "name": "callee" },
+            { "type": "[]Expr", "name": "arguments" },
+            { "type": "Token", "name": "closingParen" }
+          ]
         }
       ]
     },

@@ -25,6 +25,8 @@ type ExprVisitor interface {
 	VisitAssignExpr(v *AssignExpr) (result interface{}, err error)
 
 	VisitLogicalExpr(v *LogicalExpr) (result interface{}, err error)
+
+	VisitCallExpr(v *CallExpr) (result interface{}, err error)
 }
 
 type StubExprVisitor struct{}
@@ -58,6 +60,10 @@ func (s StubExprVisitor) VisitAssignExpr(_ *AssignExpr) (result interface{}, err
 
 func (s StubExprVisitor) VisitLogicalExpr(_ *LogicalExpr) (result interface{}, err error) {
 	return nil, errors.New("visit func for LogicalExpr is not implemented")
+}
+
+func (s StubExprVisitor) VisitCallExpr(_ *CallExpr) (result interface{}, err error) {
+	return nil, errors.New("visit func for CallExpr is not implemented")
 }
 
 // define the subtype Binary (5.2.2 Metaprogramming the trees)
@@ -155,6 +161,22 @@ func (b *LogicalExpr) Accept(visitor ExprVisitor) (result interface{}, err error
 }
 
 var _ Expr = (*LogicalExpr)(nil)
+
+// define the subtype Call (5.2.2 Metaprogramming the trees)
+type CallExpr struct {
+	callee Expr
+
+	arguments []Expr
+
+	closingParen Token
+}
+
+// each subtype implements the abstract accept() and calls the right visit method (5.3.3 Visitors for expressions)
+func (b *CallExpr) Accept(visitor ExprVisitor) (result interface{}, err error) {
+	return visitor.VisitCallExpr(b)
+}
+
+var _ Expr = (*CallExpr)(nil)
 
 // define the base Stmt (5.2.2 Metaprogramming the trees)
 type Stmt interface {

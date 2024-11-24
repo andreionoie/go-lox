@@ -302,7 +302,9 @@ var _ Stmt = (*FunctionStmt)(nil)
 
 // define the subtype Return (5.2.2 Metaprogramming the trees)
 type ReturnStmt struct {
-	expression Expr
+	keyword Token
+
+	value Expr
 }
 
 // each subtype implements the abstract accept() and calls the right visit method (5.3.3 Visitors for expressions)

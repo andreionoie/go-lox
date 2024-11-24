@@ -44,15 +44,15 @@ func (itp *AstInterpreter) VisitFunctionStmt(s *FunctionStmt) (result interface{
 }
 
 func (itp *AstInterpreter) VisitReturnStmt(s *ReturnStmt) (result interface{}, err error) {
-	if s.expression == nil { // empty return value defaults to nil
-		return nil, &ReturnBubbleUp{nil}
+	var returnValue interface{} // empty return value defaults to nil
+	if s.value != nil {
+		returnValue, err = s.value.Accept(itp)
+		if err != nil {
+			return nil, err
+		}
 	}
 
-	returnValue, err := s.expression.Accept(itp)
-	if err != nil {
-		return nil, err
-	}
-	return nil, &ReturnBubbleUp{returnValue}
+	return nil, &ReturnUnwindCallstack{returnValue}
 }
 
 // TODO: fix useless result for statements (remove)

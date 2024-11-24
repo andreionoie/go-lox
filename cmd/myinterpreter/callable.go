@@ -47,10 +47,12 @@ func (lf LoxFunction) Call(itp *AstInterpreter, arguments []interface{}) (interf
 
 	for _, bodyStmt := range lf.declaration.body {
 		_, err := bodyStmt.Accept(itp)
-		if err != nil {
-			if returnBubbledUp, ok := err.(*ReturnBubbleUp); ok {
-				return returnBubbledUp.Value, nil
-			}
+		switch e := err.(type) {
+		case *ReturnUnwindCallstack:
+			return e.Value, nil
+		case nil:
+			// do nothing; proceed with next statement
+		default:
 			fmt.Fprintln(os.Stderr, err)
 		}
 	}
@@ -62,10 +64,10 @@ func (lf LoxFunction) String() string {
 	return fmt.Sprintf("<fn %s>", lf.declaration.name.Lexeme)
 }
 
-type ReturnBubbleUp struct {
+type ReturnUnwindCallstack struct {
 	Value interface{}
 }
 
-func (r *ReturnBubbleUp) Error() string {
+func (r *ReturnUnwindCallstack) Error() string {
 	return "return statement - everything OK, no errors"
 }

@@ -159,6 +159,7 @@ func (p *Parser) block() ([]Stmt, error) {
 }
 
 func (p *Parser) returnStatement() (s Stmt, err error) {
+	kyw := p.previous()
 	var expr Expr
 	if p.Tokens[p.Current].Type != Semicolon {
 		expr, err = p.expression()
@@ -168,11 +169,12 @@ func (p *Parser) returnStatement() (s Stmt, err error) {
 	}
 	p.Current++
 	if p.previous().Type != Semicolon {
-		return nil, p.getError("Expect ';' after return.")
+		return nil, p.getError("Expect ';' after return value.")
 	}
 
 	return &ReturnStmt{
-		expression: expr,
+		keyword: kyw,
+		value:   expr,
 	}, nil
 }
 

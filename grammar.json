@@ -83,7 +83,10 @@
         },
         {
           "head": "Return",
-          "body": [{ "type": "Expr", "name": "expression" }]
+          "body": [
+            { "type": "Token", "name": "keyword" },
+            { "type": "Expr", "name": "value" }
+          ]
         },
         {
           "head": "Block",

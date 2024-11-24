@@ -38,7 +38,10 @@ func (itp *AstInterpreter) Interpret(stmts []Stmt) {
 }
 
 func (itp *AstInterpreter) VisitFunctionStmt(s *FunctionStmt) (result interface{}, err error) {
-	loxFunc := &LoxFunction{s}
+	loxFunc := &LoxFunction{
+		declaration: s,
+		closure:     itp.env, // store in memory the environment (hierarchy) that was active on function declaration
+	}
 	itp.env.Define(s.name.Lexeme, loxFunc)
 	return nil, nil
 }

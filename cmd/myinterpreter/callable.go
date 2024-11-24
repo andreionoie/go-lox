@@ -27,6 +27,7 @@ func (c ClockFunc) String() string {
 
 type LoxFunction struct {
 	declaration *FunctionStmt
+	closure     *Environment
 }
 
 func (lf LoxFunction) Arity() int {
@@ -36,7 +37,7 @@ func (lf LoxFunction) Arity() int {
 func (lf LoxFunction) Call(itp *AstInterpreter, arguments []interface{}) (interface{}, error) {
 	previousEnv := itp.env
 	itp.env = &Environment{
-		Enclosing: itp.Globals,
+		Enclosing: lf.closure, // use the environment (hierarchy) surrounding the function declaration
 		Values:    make(map[string]interface{}),
 	}
 	defer func() { itp.env = previousEnv }()
